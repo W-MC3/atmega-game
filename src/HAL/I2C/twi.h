@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <avr/io.h>
+#include <stdbool.h>
 
 #ifndef __TWI_H__
 #define __TWI_H__
@@ -172,7 +173,7 @@
    *
    * @return  char
    */
-  char TWI_Receive_Byte (void);
+  char TWI_Receive_Byte (bool ack);
 
   /**
    * @desc    TWI stop

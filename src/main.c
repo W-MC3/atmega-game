@@ -34,18 +34,13 @@ void loop(void) {
         uint8_t z = state.z_button;
         uint8_t c = state.c_button;
 
-        // ---- USE VALUES HERE ----
-        // joyX = 0..255
-        // joyY = 0..255
-
-        // Example: print to UART, or control something
         while (!txAvailable());
-        print("X=%u Y=%u\r\n", joyX, joyY);
+        print("X=%u Y=%u\n", joyX, joyY);
         while (!txAvailable());
-        print("Z=%u, c=%u\r\n", z, c);
+        print("Z=%u, c=%u\n", z, c);
     }
 
-    _delay_ms(20);   // Nunchuk needs ~5–10ms between reads
+    _delay_ms(20);
 }
 
 int main() {

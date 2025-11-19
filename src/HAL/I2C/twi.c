@@ -163,20 +163,27 @@ void TWI_Transmit_Byte(char data)
  *
  * @return  char
  */
-char TWI_Receive_Byte(void)
+char TWI_Receive_Byte(bool ack)
 {
   // init status
   char status = TWI_STATUS_INIT;
   // DATA RECEIVE
   // ----------------------------------------------
-  // enable with NACK
-  TWI_MSTR_ENABLE_NACK();
+  // enable with ACK/NACK depending on caller
+  if (ack) {
+    TWI_MSTR_ENABLE_ACK();
+  } else {
+    TWI_MSTR_ENABLE_NACK();
+  }
   // wait till flag set
   TWI_WAIT_TILL_TWINT_IS_SET();
   // status read
   status = TWI_STATUS;
   // send with success
-  if (status != TWI_MR_DATA_NACK) {
+  if (ack && status != TWI_MR_DATA_ACK) {
+    // error status
+    TWI_Error(status, TWI_MR_DATA_ACK);
+  } else if (!ack && status != TWI_MR_DATA_NACK) {
     // error status
     TWI_Error(status, TWI_MR_DATA_NACK);
   }
