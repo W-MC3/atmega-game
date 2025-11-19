@@ -5,8 +5,7 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include "uart.h"
-#include "../pins/pins.h"
-#include "../system.h"
+#include "../lib/system.h"
 
 #define RX_BUFFER_SIZE 50
 
