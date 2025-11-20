@@ -1,6 +1,10 @@
-//
-// Created by michiel on 9/9/25.
-//
+/****************************************************************************************
+* File:         uart.h
+* Author:       Michiel Dirks
+* Created on:   09-09-2025
+* Company:      Windesheim
+* Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+****************************************************************************************/
 
 #ifndef CODE_UART_H
 #define CODE_UART_H
@@ -39,7 +43,7 @@ typedef enum {
  * @brief UART initialization parameters.
  */
 typedef struct {
-    uint32_t BaudRate;
+    uint32_t baudRate;
     uart_parity_t parity;
     uart_stop_bits_t stopBits;
     uart_char_size_t charSize;

@@ -1,3 +1,11 @@
+/****************************************************************************************
+* File:         uart.c
+* Author:       Michiel Dirks
+* Created on:   20-11-2025
+* Company:      Windesheim
+* Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+****************************************************************************************/
+
 #include <util/delay.h>
 #include "HAL/I2C/twi.h"
 #include "HAL/uart/uart.h"
@@ -11,7 +19,7 @@ void start(void) {
     TWI_Init();
 
     initUart((uart_config_t) {
-        .BaudRate = UART_BAUDRATE,
+        .baudRate = UART_BAUDRATE,
         .parity = UART_PARITY_ODD,
         .stopBits = UART_STOP_1BIT,
         .charSize = UART_CS_8BITS

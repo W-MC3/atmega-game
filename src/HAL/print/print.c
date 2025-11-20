@@ -1,6 +1,10 @@
-//
-// Created by michiel on 9/16/25.
-//
+/****************************************************************************************
+* File:         print.c
+* Author:       Michiel Dirks
+* Created on:   16-09-2025
+* Company:      Windesheim
+* Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+****************************************************************************************/
 
 #include <stdarg.h>
 #include <stdio.h>

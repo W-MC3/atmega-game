@@ -1,6 +1,10 @@
-//
-// Created by michiel on 9/9/25.
-//
+/****************************************************************************************
+* File:         uart.c
+* Author:       Michiel Dirks
+* Created on:   09-09-2025
+* Company:      Windesheim
+* Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+****************************************************************************************/
 
 #include <stdlib.h>
 #include <avr/interrupt.h>
@@ -19,7 +23,7 @@ typedef struct {
     bool bufferOverrun;
 } receiveBuffer_s;
 
-receiveBuffer_s rxBuffer = { {0}, 0, 0, false };
+volatile receiveBuffer_s rxBuffer = { {0}, 0, 0, false };
 
 typedef struct {
     volatile void* bufferStart;
@@ -27,13 +31,13 @@ typedef struct {
     volatile uint16_t currentIndex;
 } sendBuffer_s;
 
-sendBuffer_s dataToSend = { NULL, 0, 0 };
+volatile sendBuffer_s dataToSend = { NULL, 0, 0 };
 
 /**
  * @brief Initializes UART0 with the provided configuration and enables interrupts.
  */
 void initUart(uart_config_t config) {
-    const uint16_t ubrr = F_CPU / CLOCK_PRESCALER / config.BaudRate - 1;
+    const uint16_t ubrr = F_CPU / CLOCK_PRESCALER / config.baudRate - 1;
     UBRR0H = (uint8_t)(ubrr >> 8);  // Shift by 8 to get the high byte
     UBRR0L = (uint8_t)ubrr;
 
@@ -63,6 +67,10 @@ void sendNextFromBuffer() {
 
 /**
  * @brief Queues a buffer for transmission via UART using UDRE interrupts.
+ *
+ * The user MUST check whether the buffer is ready to send new data by calling
+ * txAvailable() before invoking this function; otherwise, the previous message
+ * may not be sent completely.
  */
 void sendUartData(void* data, uint8_t dataLen) {
     uint8_t sreg = SREG;
