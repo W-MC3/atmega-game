@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include "uart.h"
-#include "../lib/system.h"
 
 #define RX_BUFFER_SIZE 50
 
@@ -116,10 +115,6 @@ bool receiveOverrun() {
     const bool overrun = rxBuffer.bufferOverrun;
     rxBuffer.bufferOverrun = false;
     return overrun;
-}
-
-uint8_t uartErrorReg() {
-    return UCSR0A & 0b00011100;
 }
 
 ISR(USART_RX_vect) {

@@ -74,8 +74,6 @@ void sendUartData(void* data, uint8_t dataLen);
  */
 bool uartDataAvailable();
 
-uint8_t uartErrorReg();
-
 /**
  * @brief Reads one byte from the RX buffer.
  * @return The byte read, or 0 if buffer is empty.
