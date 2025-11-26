@@ -7,8 +7,8 @@
 ****************************************************************************************/
 
 #include <util/delay.h>
-#include "HAL/I2C/twi.h"
-#include "HAL/uart/uart.h"
+#include "hardware/i2c/twi.h"
+#include "hardware/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 
