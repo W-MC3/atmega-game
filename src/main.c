@@ -12,6 +12,7 @@
 #include "HAL/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
+#include "tone.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
@@ -56,19 +57,19 @@ void start(void) {
     nunchuk_begin(NUNCHUK_ADDR);
 
     startAdc();
+
+    initTone();
+    playTone(3000);
 }
 
 void loop(void) {
+    setVolume(adc_value);
     if (nunchuk_get_state(NUNCHUK_ADDR)) {
 
         uint8_t joyX = state.joy_x_axis;
         uint8_t joyY = state.joy_y_axis;
         uint8_t z = state.z_button;
         uint8_t c = state.c_button;
-    }
-
-    if (txAvailable()) {
-        print("adc_value=%u\n", adc_value);
     }
 
     _delay_ms(20);
