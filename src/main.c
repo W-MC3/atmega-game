@@ -12,7 +12,7 @@
 #include "HAL/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
-#include "tone.h"
+#include "../lib/tone/tone.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600

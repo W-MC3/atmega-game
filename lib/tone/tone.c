@@ -8,10 +8,10 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include "tone.h"
-#include "../lib/system.h"
-#include "HAL/Timers/timer0/timer0.h"
-#include "HAL/Timers/timer2/timer2.h"
+#include "../../src/tone.h"
+#include "../system.h"
+#include "../../src/HAL/Timers/timer0/timer0.h"
+#include "../../src/HAL/Timers/timer2/timer2.h"
 
 static bool buzzerEnabled = false;
 
