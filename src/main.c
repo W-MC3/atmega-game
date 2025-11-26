@@ -7,13 +7,35 @@
 ****************************************************************************************/
 
 #include <util/delay.h>
-#include "hardware/i2c/twi.h"
-#include "hardware/uart/uart.h"
+#include "HAL/I2C/twi.h"
+#include "HAL/ADC/ADC.h"
+#include "HAL/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
+
+volatile uint8_t adc_value = 0;
+
+void adcCallback(const uint16_t result) {
+    adc_value = result >> 8; // 8 bits is enough
+}
+
+void startAdc() {
+    configure_adc(&(ADC_config_t){
+        .reference = AREF_EXT,
+        .adjust_data_left = true,
+        .input_source = ADC_0,
+        .clock_prescaler = DIV_PRE_128,
+        .auto_trigger = true,
+        .interrupt_source = FREE_RUNNING,
+        .callback = adcCallback,
+    });
+
+    enable_adc();
+    start_conversion();
+}
 
 void start(void) {
     TWI_Init();
@@ -32,6 +54,8 @@ void start(void) {
     );
 
     nunchuk_begin(NUNCHUK_ADDR);
+
+    startAdc();
 }
 
 void loop(void) {
@@ -41,11 +65,10 @@ void loop(void) {
         uint8_t joyY = state.joy_y_axis;
         uint8_t z = state.z_button;
         uint8_t c = state.c_button;
+    }
 
-        while (!txAvailable());
-        print("X=%u Y=%u\n", joyX, joyY);
-        while (!txAvailable());
-        print("Z=%u, c=%u\n", z, c);
+    if (txAvailable()) {
+        print("adc_value=%u\n", adc_value);
     }
 
     _delay_ms(20);
