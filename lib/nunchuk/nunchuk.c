@@ -19,7 +19,7 @@
  * bRAM, Michiel
  */
 #include <util/delay.h>
-#include "../../src/HAL/I2C/twi.h"
+#include "../../src/hardware/i2c/twi.h"
 #include "nunchuk.h"
 
 // nunchuk memory addresses
