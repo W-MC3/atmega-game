@@ -30,15 +30,15 @@ void configure_adc(const ADC_config_t *config) {
     }
 }
 
-void enable_adc() {
+void enable_adc(void) {
     ADCSRA |= (1 << ADEN);
 }
 
-void disable_adc() {
+void disable_adc(void) {
     ADCSRA &= ~(1 << ADEN);
 }
 
-void start_conversion() {
+void start_conversion(void) {
     ADCSRA |= (1 << ADSC);
 }
 
@@ -61,7 +61,7 @@ void set_adc_conversion_complete_interrupt(bool enable, void (*callback)(uint16_
     }
 }
 
-uint16_t read_adc_result() {
+uint16_t read_adc_result(void) {
     return ADCL | (ADCH << 8);
 }
 
