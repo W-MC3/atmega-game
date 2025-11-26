@@ -74,16 +74,16 @@ typedef struct {
 
 void configure_adc(const ADC_config_t *config);
 
-void enable_adc();
+void enable_adc(void);
 
-void disable_adc();
+void disable_adc(void);
 
-void start_conversion();
+void start_conversion(void);
 
 void set_auto_triggers_enabled(bool enable);
 
 void set_adc_conversion_complete_interrupt(bool enable, void (*callback)(uint16_t result));
 
-uint16_t read_adc_result();
+uint16_t read_adc_result(void);
 
 #endif //ADC_ADC_H
