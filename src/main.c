@@ -7,6 +7,8 @@
 ****************************************************************************************/
 
 #include <util/delay.h>
+#include <gfx/gfx.h>
+#include <Arduino.h>
 #include "hardware/i2c/twi.h"
 #include "hardware/uart/uart.h"
 #include "../lib/print/print.h"
@@ -51,10 +53,56 @@ void loop(void) {
     _delay_ms(20);
 }
 
-int main() {
-    start();
+void test_gfx() {
+    gfx_bitmap_t grass_bmp = {
+        .filename = "grass.bmp"
+    };
+
+    gfx_bitmap_t water_bmp = {
+        .filename = "water.bmp"
+    };
+
+    gfx_bitmap_t player_bmp = {
+        .filename = "player.bmp"
+    };
+
+    gfx_tilemap_t tilemap = {
+        .kinds = { &grass_bmp, &water_bmp },
+        .tiles = {
+            0, 0, 0,
+            0, 1, 0,
+            0, 0, 0
+        }
+    };
+
+    gfx_sprite_t player = {
+        .position = { 0, 0 },
+        .bitmap = &player_bmp
+    };
+
+    gfx_scene_t scene = {
+        .tilemap = &tilemap,
+        .sprites = { &player }
+    };
+
+    gfx_init();
+    gfx_set_scene(&scene);
 
     for (;;) {
-        loop();
+        gfx_move_sprite(&player, player.position.x + 1, player.position.y);
+        gfx_frame();
+
+        _delay_ms(100);
     }
+}
+
+int main() {
+    init();
+    test_gfx();
+
+    // start();
+    //
+    // for (;;) {
+    //     loop();
+    // }
 }
