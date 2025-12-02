@@ -58,10 +58,13 @@
 #define GFX_DIRTY_BIT 1
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // Represents a bitmap (SD Card handles)
 typedef struct gfx_bitmap {
     const char* filename;
+    int32_t offset;
+    int32_t row_size;
 } gfx_bitmap_t;
 
 // Represents a tilemap (The world, traps, etc), note that every tilemap is of equal size.
@@ -100,6 +103,9 @@ GFX_EXTERN_C void gfx_frame();
 // Resets the currently active scene
 GFX_EXTERN_C void gfx_reset();
 
+// Loads metadata for a bitmap from the SD card
+GFX_EXTERN_C int gfx_init_bitmap(gfx_bitmap_t* bitmap);
+
 // Adds a sprite to the active scene
 GFX_EXTERN_C void gfx_add_sprite(gfx_sprite_t* sprite);
 
@@ -131,10 +137,10 @@ GFX_EXTERN_C void gfx_push_dirty_tile(int16_t tx, int16_t ty);
 GFX_EXTERN_C void gfx_push_dirty_rect(int16_t x, int16_t y, int16_t width, int16_t height);
 
 // Directly writes a batch of tiles to the screen (internals)
-GFX_EXTERN_C void gfx_draw_tiles(gfx_vec2_t* positions, gfx_bitmap_t* texture, uint8_t count);
+GFX_EXTERN_C void gfx_draw_tiles(gfx_vec2_t* positions, gfx_bitmap_t* bitmap, uint8_t count);
 
 // Partially updates a single tile (internals)
-GFX_EXTERN_C void gfx_draw_tile(gfx_vec2_t position, gfx_vec2_t size, gfx_bitmap_t* texture, gfx_vec2_t tex_offset);
+GFX_EXTERN_C void gfx_draw_tile(gfx_vec2_t position, gfx_vec2_t size, gfx_bitmap_t* bitmap, gfx_vec2_t tex_offset);
 
 // Transform a world to screen coordinate
 GFX_EXTERN_C gfx_vec2_t gfx_world_to_screen(gfx_vec2_t vec);

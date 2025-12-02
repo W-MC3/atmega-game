@@ -54,20 +54,16 @@ void loop(void) {
 }
 
 void test_gfx() {
-    gfx_bitmap_t grass_bmp = {
-        .filename = "grass.bmp"
+    gfx_bitmap_t grass = {
+        .filename = "GRASS.BMP"
     };
 
-    gfx_bitmap_t water_bmp = {
-        .filename = "water.bmp"
-    };
-
-    gfx_bitmap_t player_bmp = {
-        .filename = "player.bmp"
+    gfx_bitmap_t water = {
+        .filename = "WATER.BMP"
     };
 
     gfx_tilemap_t tilemap = {
-        .kinds = { &grass_bmp, &water_bmp },
+        .kinds = { &grass, &water },
         .tiles = {
             0, 0, 0,
             0, 1, 0,
@@ -75,24 +71,18 @@ void test_gfx() {
         }
     };
 
-    gfx_sprite_t player = {
-        .position = { 0, 0 },
-        .bitmap = &player_bmp
-    };
-
     gfx_scene_t scene = {
         .tilemap = &tilemap,
-        .sprites = { &player }
+        .sprites = {}
     };
 
     gfx_init();
+    gfx_init_bitmap(&grass);
+    gfx_init_bitmap(&water);
     gfx_set_scene(&scene);
 
     for (;;) {
-        gfx_move_sprite(&player, player.position.x + 1, player.position.y);
         gfx_frame();
-
-        _delay_ms(100);
     }
 }
 
