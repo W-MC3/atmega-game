@@ -11,7 +11,7 @@ void timer0CompareCallback(void);
 
 void setVolume(uint8_t volume);
 
-void playTone(uint16_t frequency);
+void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void));
 
 void initTone(void);
 
