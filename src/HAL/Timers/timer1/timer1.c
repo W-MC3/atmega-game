@@ -40,7 +40,7 @@ void initTimer1(const s_TIM1_CONFIG *config) {
     }
 }
 
-void setOCR1A(uint8_t value) {
+void setOCR1A(uint16_t value) {
     OCR1A = value;
 }
 

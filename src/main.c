@@ -13,6 +13,8 @@
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "../lib/tone/tone.h"
+#include "math.h"
+#include "../lib/scheduler/delay.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
@@ -38,6 +40,77 @@ void startAdc() {
     start_conversion();
 }
 
+typedef struct {
+    uint16_t frequency;  // Hz
+    uint16_t duration;   // ms
+} tone;
+
+#define _ 0  // for rests
+
+tone tetrisTheme[] = {
+    {659, 406},
+    {494, 203},
+    {523, 203},
+    {587, 406},
+    {523, 203},
+    {494, 203},
+    {440, 406},
+{1, 30},
+    {440, 203},
+    {523, 203},
+    {659, 406},
+    {587, 203},
+    {523, 203},
+    {494, 609},
+    {523, 203},
+    {587, 406},
+    {659, 406},
+    {523, 406},
+    {440, 406},
+{1, 30},
+    {440, 203},
+{1, 30},
+    {440, 203},
+    {494, 203},
+    {523, 203},
+    {587, 609},
+    {698, 203},
+    {880, 406},
+    {784, 203},
+    {698, 203},
+    {659, 609},
+    {523, 203},
+    {659, 406},
+    {587, 203},
+    {523, 203},
+    {494, 406},
+{1, 30},
+    {494, 203},
+    {523, 203},
+    {587, 406},
+    {659, 406},
+    {523, 406},
+    {440, 406},
+{1, 30},
+    {440, 406},
+};
+
+
+uint8_t toneIndex = 0;
+uint8_t toneCount = sizeof(tetrisTheme) / sizeof(tetrisTheme[0]);
+
+void play_next_tone() {
+    if (toneIndex >= toneCount) {
+        toneIndex = 0;
+    }
+
+    uint16_t f = tetrisTheme[toneIndex].frequency;
+    uint16_t d = tetrisTheme[toneIndex].duration;
+    toneIndex++;
+
+    playTone(f, d, play_next_tone);
+}
+
 void start(void) {
     TWI_Init();
 
@@ -56,10 +129,12 @@ void start(void) {
 
     nunchuk_begin(NUNCHUK_ADDR);
 
+    init_system_timer();
+
     startAdc();
 
     initTone();
-    playTone(3000);
+    playTone(100, 10, play_next_tone);
 }
 
 void loop(void) {

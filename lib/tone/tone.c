@@ -8,12 +8,19 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include "../../src/tone.h"
+#include "tone.h"
+#include "../../src/HAL/uart/uart.h"
+#include "../../lib/print/print.h"
 #include "../system.h"
 #include "../../src/HAL/Timers/timer0/timer0.h"
 #include "../../src/HAL/Timers/timer2/timer2.h"
+#include "../scheduler/delay.h"
 
 static bool buzzerEnabled = false;
+
+uint32_t toneStartTime = 0;
+uint16_t toneDuration = 0;
+static void (*toneDoneCallback)(void) = NULL;
 
 void timer0CompareCallback(void) {
     buzzerEnabled = !buzzerEnabled;
@@ -24,13 +31,25 @@ void timer0CompareCallback(void) {
         // Enable PWM output from Timer2 (sound)
         setCompareOutputModeBTimer2(TIM2_ClearOC2BCompareMatch);
     }
+
+    if (toneDuration == 0) {
+        return;
+    }
+
+    if (millis() - toneStartTime >= toneDuration && toneDoneCallback != NULL) {
+        toneDuration = 0;
+        toneDoneCallback();
+    }
 }
 
 void setVolume(uint8_t volume) {
     setOCR2B(volume);
 }
 
-void playTone(uint16_t frequency) {
+void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void)) {
+    toneDoneCallback = toneCallback;
+    toneStartTime = millis();
+    toneDuration = duration;
     const uint32_t prescalers[] = {1, 8, 64, 256, 1024};
     const e_TIM0_ClockSource prescalerCodes[] = {
         TIM0_CLOCK_DEFAULT,
@@ -40,13 +59,14 @@ void playTone(uint16_t frequency) {
         TIM0_CLOCK_PRESCALER_1024
     };
 
-    uint8_t prescalerIndex = 4;
+    uint8_t prescalerIndex = 0;
     uint16_t top = 0;
-    for (uint8_t i = 4; i > 0; i--) {
+    for (uint8_t i = 0; i < 5; i++) {
         top = (FREQ_CPU / (2 * prescalers[i] * frequency)) - 1;
-        if (top > 255) {
+        prescalerIndex = i;
+        if (top < 255) {
             break;
-        } prescalerIndex = i;
+        }
     }
 
     setTimer0ClockSource(prescalerCodes[prescalerIndex]);
