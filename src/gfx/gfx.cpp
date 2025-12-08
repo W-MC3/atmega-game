@@ -50,7 +50,7 @@ void gfx_frame() {
     }
 
     if ((active_scene->tilemap->flags & GFX_DIRTY_BIT) != 0) {
-        tft.fillScreen(ILI9341_BLUE);
+        tft.fillScreen(GFX_CONFIG_BACKGROUND_COLOUR);
         for (int16_t tx = 0; tx < GFX_TILEMAP_WIDTH; tx++) {
             for (int16_t ty = 0; ty < GFX_TILEMAP_HEIGHT; ty++) {
                 const int idx = ty * GFX_TILEMAP_WIDTH + tx;
@@ -103,7 +103,7 @@ void gfx_frame() {
 void gfx_reset() {
     active_scene = NULL;
     dirty_rects_count = 0;
-    tft.fillScreen(ILI9341_BLUE);
+    tft.fillScreen(GFX_CONFIG_BACKGROUND_COLOUR);
 }
 
 void gfx_add_sprite(gfx_sprite_t* sprite) {
