@@ -10,7 +10,7 @@
 #include <avr/interrupt.h>
 #include "uart.h"
 
-#define RX_BUFFER_SIZE 120
+#define RX_BUFFER_SIZE 50
 
 #define CLOCK_PRESCALER 16
 
