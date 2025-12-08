@@ -9,11 +9,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "tone.h"
-#include "../../src/HAL/uart/uart.h"
-#include "../../lib/print/print.h"
+#include "../../src/hardware/uart/uart.h"
 #include "../system.h"
-#include "../../src/HAL/Timers/timer0/timer0.h"
-#include "../../src/HAL/Timers/timer2/timer2.h"
+#include "../../src/hardware/Timers/timer0/timer0.h"
+#include "../../src/hardware/Timers/timer2/timer2.h"
 #include "../scheduler/delay.h"
 
 static bool buzzerEnabled = false;

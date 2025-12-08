@@ -8,7 +8,7 @@
 
 #include <stddef.h>
 #include "delay.h"
-#include "../../src/HAL/Timers/timer1/timer1.h"
+#include "../../src/hardware/Timers/timer1/timer1.h"
 
 static volatile uint32_t _millis = 0;
 
