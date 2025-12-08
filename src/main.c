@@ -1,6 +1,6 @@
 /****************************************************************************************
 * File:         uart.c
-* Author:       Michiel Dirks
+* Author:       Michiel Dirks, Mikai Bolding
 * Created on:   20-11-2025
 * Company:      Windesheim
 * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
@@ -18,6 +18,8 @@
 #define UART_BAUDRATE 9600
 
 void start(void) {
+    init();
+
     TWI_Init();
 
     initUart((uart_config_t) {
@@ -62,37 +64,57 @@ void test_gfx() {
         .filename = "WATER.BMP"
     };
 
+    gfx_bitmap_t tile = {
+        .filename = "TILE.BMP"
+    };
+
     gfx_tilemap_t tilemap = {
-        .kinds = { &grass, &water },
+        .kinds = { &grass, &water, &tile },
         .tiles = {
-            0, 0, 0,
-            0, 1, 0,
-            0, 0, 0
+            2, 2, 2, 2, 2,
+            2, 0, 0, 0, 2,
+            2, 0, 1, 0, 2,
+            2, 0, 0, 0, 2,
+            2, 2, 2, 2, 2
         }
+    };
+
+    gfx_sprite_t object = {
+        .position = { 2, 2 },
+        .bitmap = &tile
     };
 
     gfx_scene_t scene = {
         .tilemap = &tilemap,
-        .sprites = {}
+        .sprites = { &object },
+        .sprite_count = 1
     };
 
     gfx_init();
     gfx_init_bitmap(&grass);
     gfx_init_bitmap(&water);
+    gfx_init_bitmap(&tile);
     gfx_set_scene(&scene);
 
+    float angle = 0.0;
+
+    const gfx_vec2_t center = gfx_world_to_screen((gfx_vec2_t){ 2, 2 });
+
     for (;;) {
+        angle += 0.1f;
+        gfx_move_sprite(&object,
+            center.x + (int16_t)(30.0f * cosf(angle)),
+            center.y + (int16_t)(30.0f * sinf(angle))
+        );
+
         gfx_frame();
     }
 }
 
 int main() {
-    init();
-    test_gfx();
+    start();
 
-    // start();
-    //
-    // for (;;) {
-    //     loop();
-    // }
+    for (;;) {
+        loop();
+    }
 }

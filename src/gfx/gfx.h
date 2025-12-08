@@ -22,11 +22,11 @@
 #endif // GFX_TILEMAP_MAX_KINDS
 
 #ifndef GFX_TILEMAP_WIDTH
-#define GFX_TILEMAP_WIDTH 3
+#define GFX_TILEMAP_WIDTH 5
 #endif // GFX_TILEMAP_WIDTH
 
 #ifndef GFX_TILEMAP_HEIGHT
-#define GFX_TILEMAP_HEIGHT 3
+#define GFX_TILEMAP_HEIGHT 5
 #endif // GFX_TILEMAP_HEIGHT
 
 #ifndef GFX_TILEMAP_TILE_WIDTH
@@ -44,10 +44,6 @@
 #ifndef GFX_TILEMP_TILE_HALF_HEIGHT
 #define GFX_TILEMP_TILE_HALF_HEIGHT (GFX_TILEMAP_TILE_HEIGHT / 2)
 #endif // GFX_TILEMP_TILE_HALF_HEIGHT
-
-#ifndef LITTLE_FOOT_PRINT
-#define LITTLE_FOOT_PRINT
-#endif // LITTLE_FOOT_PRINT
 
 #ifdef __cplusplus
 #define GFX_EXTERN_C extern "C"
@@ -79,6 +75,14 @@ typedef struct gfx_vec2 {
     int16_t x;
     int16_t y;
 } gfx_vec2_t;
+
+// Represents a rectangle
+typedef struct gfx_rect {
+    int16_t x;
+    int16_t y;
+    int16_t width;
+    int16_t height;
+} gfx_rect_t;
 
 // Represents an entity (UI Elements, the player, etc)
 typedef struct gfx_sprite {
@@ -130,22 +134,21 @@ GFX_EXTERN_C void gfx_invalidate_tile(gfx_tilemap_t* map, int16_t tx, int16_t ty
 // Assumes a sprite as dirty
 GFX_EXTERN_C void gfx_invalidate_sprite(gfx_sprite_t* sprite);
 
-// Unsafely pushes a dirty-tile to the graphics driver
-GFX_EXTERN_C void gfx_push_dirty_tile(int16_t tx, int16_t ty);
-
 // Unsafely pushes a dirty-rect to the graphics driver
 GFX_EXTERN_C void gfx_push_dirty_rect(int16_t x, int16_t y, int16_t width, int16_t height);
 
-// Directly writes a batch of tiles to the screen (internals)
-GFX_EXTERN_C void gfx_draw_tiles(gfx_vec2_t* positions, gfx_bitmap_t* bitmap, uint8_t count);
-
 // Partially updates a single tile (internals)
-GFX_EXTERN_C void gfx_draw_tile(gfx_vec2_t position, gfx_vec2_t size, gfx_bitmap_t* bitmap, gfx_vec2_t tex_offset);
+GFX_EXTERN_C void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect);
 
+// TODO: batch API (gfx_draw_tiles)?
 // Transform a world to screen coordinate
 GFX_EXTERN_C gfx_vec2_t gfx_world_to_screen(gfx_vec2_t vec);
 
 // Transform a screen to world coordinate
 GFX_EXTERN_C gfx_vec2_t gfx_screen_to_world(gfx_vec2_t vec);
+
+#ifndef GFX_FULLSCREEN
+#define GFX_FULLSCREEN ((gfx_rect_t){ 0, 0, 240, 320 })
+#endif
 
 #endif //ATMEGA_GAME_GFX_H
