@@ -302,6 +302,11 @@ void gfx_invalidate_tile(gfx_tilemap_t* map, const int16_t tx, const int16_t ty)
     );
 }
 
+void gfx_set_tile(gfx_tilemap_t* map, int16_t tx, int16_t ty, uint8_t kind) {
+    map->tiles[ty * GFX_TILEMAP_WIDTH + tx] = kind;
+    gfx_invalidate_tile(map, tx, ty);
+}
+
 void gfx_invalidate_sprite(gfx_sprite_t* sprite) {
     sprite->flags |= GFX_DIRTY_BIT;
     gfx_push_dirty_rect(

@@ -120,6 +120,9 @@ GFX_EXTERN_C void gfx_remove_sprite(gfx_sprite_t* sprite);
 // Moves a sprite to the given position (and invalidates it)
 GFX_EXTERN_C void gfx_move_sprite(gfx_sprite_t* sprite, int16_t x, int16_t y);
 
+// Changes and invalidates a certain tile
+GFX_EXTERN_C void gfx_set_tile(gfx_tilemap_t* map, int16_t tx, int16_t ty, uint8_t kind);
+
 // Sets the active tilemap of the active scene
 GFX_EXTERN_C void gfx_set_tilemap(gfx_tilemap_t* map);
 
@@ -144,7 +147,6 @@ GFX_EXTERN_C void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_r
 // Fully updates a sprite
 GFX_EXTERN_C void gfx_draw_sprite(gfx_sprite_t* sprite);
 
-// TODO: batch API (gfx_draw_tiles)?
 // Transform a world to screen coordinate
 GFX_EXTERN_C gfx_vec2_t gfx_world_to_screen(gfx_vec2_t vec);
 
