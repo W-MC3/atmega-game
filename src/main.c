@@ -68,6 +68,10 @@ void test_gfx() {
         .filename = "TILE.BMP"
     };
 
+    gfx_bitmap_t player_bmp = {
+        .filename = "PLAYER.BMP"
+    };
+
     gfx_tilemap_t tilemap = {
         .kinds = { &grass, &water, &tile },
         .tiles = {
@@ -79,14 +83,15 @@ void test_gfx() {
         }
     };
 
-    gfx_sprite_t object = {
+    gfx_sprite_t player = {
         .position = { 2, 2 },
-        .bitmap = &tile
+        .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
+        .bitmap = &player_bmp
     };
 
     gfx_scene_t scene = {
         .tilemap = &tilemap,
-        .sprites = { &object },
+        .sprites = { &player },
         .sprite_count = 1
     };
 
@@ -94,6 +99,7 @@ void test_gfx() {
     gfx_init_bitmap(&grass);
     gfx_init_bitmap(&water);
     gfx_init_bitmap(&tile);
+    gfx_init_bitmap(&player_bmp);
     gfx_set_scene(&scene);
 
     float angle = 0.0;
@@ -102,7 +108,7 @@ void test_gfx() {
 
     for (;;) {
         angle += 0.1f;
-        gfx_move_sprite(&object,
+        gfx_move_sprite(&player,
             center.x + (int16_t)(30.0f * cosf(angle)),
             center.y + (int16_t)(30.0f * sinf(angle))
         );
@@ -113,6 +119,7 @@ void test_gfx() {
 
 int main() {
     start();
+    test_gfx();
 
     for (;;) {
         loop();

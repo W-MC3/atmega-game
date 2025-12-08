@@ -88,6 +88,7 @@ typedef struct gfx_rect {
 typedef struct gfx_sprite {
     uint8_t flags;
     gfx_vec2_t position;
+    gfx_vec2_t size;
     gfx_bitmap_t* bitmap;
 } gfx_sprite_t;
 
@@ -139,6 +140,9 @@ GFX_EXTERN_C void gfx_push_dirty_rect(int16_t x, int16_t y, int16_t width, int16
 
 // Partially updates a single tile (internals)
 GFX_EXTERN_C void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect);
+
+// Fully updates a sprite
+GFX_EXTERN_C void gfx_draw_sprite(gfx_sprite_t* sprite);
 
 // TODO: batch API (gfx_draw_tiles)?
 // Transform a world to screen coordinate
