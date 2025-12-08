@@ -10,6 +10,7 @@
 #define CODE_PRINT_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /**
  * @brief Initializes the printing utility with UART callbacks.

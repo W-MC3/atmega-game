@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <avr/io.h>
 
 /**
  * @brief UART parity configuration options.
