@@ -10,8 +10,6 @@
 #include "ADC.h"
 #include "stdlib.h"
 
-#define LEFT_ADJUSTED (ADMUX & (1 << ADLAR))
-
 static void (*adc_callback)(uint16_t result) = NULL;
 
 void configure_adc(const ADC_config_t *config) {
