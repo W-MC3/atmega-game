@@ -30,6 +30,20 @@ void gfx_init() {
     gfx_reset();
 }
 
+/*
+refer to: https://en.wikipedia.org/wiki/BMP_file_format
+
+Offset (bytes) 	Size (bytes) 	OS/2 1.x BITMAPCOREHEADER[3]
+10 	4 	The offset, i.e. starting address, of the byte where the bitmap image data (pixel array) can be found.
+14 	4 	The size of this header (12 bytes)
+18 	2 	The bitmap width in pixels (unsigned 16-bit)
+20 	2 	The bitmap height in pixels (unsigned 16-bit)
+22 	2 	The number of color planes, must be 1
+24 	2 	The number of bits per pixel
+
+Please note that we always assume the format to be BGR24, which is the native format of the TFT display.
+The relevant ffmpeg command for conversion is: ``ffmpeg -i INPUT.PNG -pix_fmt bgr24 OUTPUT.BMP``
+*/
 int gfx_init_bitmap(gfx_bitmap_t* bitmap) {
     File32 f = SD.open(bitmap->filename);
     if (!f) return SD.sdErrorCode();
