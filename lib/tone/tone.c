@@ -22,13 +22,17 @@ uint32_t toneStartTime = 0;
 uint16_t toneDuration = 0;
 static void (*toneDoneCallback)(void) = NULL;
 
+e_TIM0_ClockSource timer0_stored_prescaler = (e_TIM0_ClockSource)0;
+
 void timer0CompareCallback(void) {
     buzzerEnabled = !buzzerEnabled;
     if (buzzerEnabled) {
-        // Disable PWM output from Timer2 (mute)
+        // Disable PWM output from Timer2 (mute) and disable it's clock source
+        timer0_stored_prescaler = (e_TIM0_ClockSource)(TCCR0B & 0x07);
         setCompareOutputModeBTimer2(TIM2_DisconnectedOC2BCompareMatch);
     } else {
         // Enable PWM output from Timer2 (sound)
+        setTimer0ClockSource(timer0_stored_prescaler);
         setCompareOutputModeBTimer2(TIM2_ClearOC2BCompareMatch);
     }
 
@@ -64,11 +68,12 @@ void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void))
     for (uint8_t i = 0; i < 5; i++) {
         top = (FREQ_CPU / (2 * prescalers[i] * frequency)) - 1;
         prescalerIndex = i;
-        if (top < 255) {
+        if (top < 150) {
             break;
         }
     }
 
+    timer0_stored_prescaler = prescalerCodes[prescalerIndex];
     setTimer0ClockSource(prescalerCodes[prescalerIndex]);
 
     setOCR0A(top);
