@@ -112,7 +112,7 @@ GFX_EXTERN_C void gfx_reset();
 GFX_EXTERN_C int gfx_init_bitmap(gfx_bitmap_t* bitmap);
 
 // Adds a sprite to the active scene
-GFX_EXTERN_C void gfx_add_sprite(gfx_sprite_t* sprite);
+GFX_EXTERN_C bool gfx_add_sprite(gfx_sprite_t* sprite);
 
 // Removes a sprite from the active scene
 GFX_EXTERN_C void gfx_remove_sprite(gfx_sprite_t* sprite);

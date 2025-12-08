@@ -45,12 +45,16 @@ int gfx_init_bitmap(gfx_bitmap_t* bitmap) {
 }
 
 void gfx_frame() {
+    // exit if no scene is defined
     if (active_scene == NULL) {
         return;
     }
 
+    // whole tilemap is dirty, redraw everything
     if ((active_scene->tilemap->flags & GFX_DIRTY_BIT) != 0) {
         tft.fillScreen(GFX_CONFIG_BACKGROUND_COLOUR);
+
+        // iterate over all tiles and draw them, clip is set to GFX_FULLSCREEN
         for (int16_t tx = 0; tx < GFX_TILEMAP_WIDTH; tx++) {
             for (int16_t ty = 0; ty < GFX_TILEMAP_HEIGHT; ty++) {
                 const int idx = ty * GFX_TILEMAP_WIDTH + tx;
@@ -60,43 +64,55 @@ void gfx_frame() {
             }
         }
 
+        // remove dirty bit
         active_scene->tilemap->flags &= ~GFX_DIRTY_BIT;
     }
 
+    // iterate over dirty rects
     for (uint8_t i = 0; i < dirty_rects_count; i++) {
         gfx_rect_t* rect = &dirty_rects[i];
 
+        // bottom-right corner
         int16_t x1 = rect->x + rect->width - 1;
         int16_t y1 = rect->y + rect->height - 1;
 
+        // get the world position of *all* four corners.
         gfx_vec2_t c0 = gfx_screen_to_world((gfx_vec2_t){ rect->x, rect->y });
         gfx_vec2_t c1 = gfx_screen_to_world((gfx_vec2_t){ x1, rect->y });
         gfx_vec2_t c2 = gfx_screen_to_world((gfx_vec2_t){ rect->x, y1 });
         gfx_vec2_t c3 = gfx_screen_to_world((gfx_vec2_t){ x1, y1 });
 
+        // get the min and max tile coordinates between all the four corners
         int16_t tx_min = min(min(c0.x, c1.x), min(c2.x, c3.x));
         int16_t tx_max = max(max(c0.x, c1.x), max(c2.x, c3.x));
         int16_t ty_min = min(min(c0.y, c1.y), min(c2.y, c3.y));
         int16_t ty_max = max(max(c0.y, c1.y), max(c2.y, c3.y));
 
+        // we iterate over all tiles and redraw with the dirty rect as the clip area.
         for (int16_t tx = tx_min; tx <= tx_max; tx++) {
             for (int16_t ty = ty_min; ty <= ty_max; ty++) {
                 if (tx < 0 || ty < 0 || tx >= GFX_TILEMAP_WIDTH || ty >= GFX_TILEMAP_HEIGHT) continue;
-                const int idx = ty * GFX_TILEMAP_WIDTH + tx;
+                const int idx = ty * GFX_TILEMAP_WIDTH + tx; // (x, y) -> idx
                 const int tile = active_scene->tilemap->tiles[idx];
                 gfx_draw_tile((gfx_vec2_t){ tx, ty }, active_scene->tilemap->kinds[tile], *rect);
             }
         }
     }
 
+    // draw sprites
     for (uint8_t i = 0; i < active_scene->sprite_count; i++) {
         gfx_sprite_t* sprite = active_scene->sprites[i];
+
+        // redraw if dirty
         if ((sprite->flags & GFX_DIRTY_BIT) != 0) {
             gfx_draw_sprite(sprite);
+
+            // remove dirty bit
             sprite->flags &= ~GFX_DIRTY_BIT;
         }
     }
 
+    // clear dirty rects
     dirty_rects_count = 0;
 }
 
@@ -106,17 +122,19 @@ void gfx_reset() {
     tft.fillScreen(GFX_CONFIG_BACKGROUND_COLOUR);
 }
 
-void gfx_add_sprite(gfx_sprite_t* sprite) {
+bool gfx_add_sprite(gfx_sprite_t* sprite) {
     if (active_scene == NULL) {
-        return;
+        return false;
     }
 
     if (active_scene->sprite_count >= GFX_SCENE_MAX_SPRITES) {
-        return;
+        return false;
     }
 
     active_scene->sprites[active_scene->sprite_count++] = sprite;
     gfx_invalidate_sprite(sprite);
+
+    return true;
 }
 
 void gfx_remove_sprite(gfx_sprite_t* sprite) {
