@@ -16,7 +16,7 @@ static void _millisUpdater(void) {
     _millis++;
 }
 
-uint32_t millis(void) {
+uint32_t scheduler_millis(void) {
     uint32_t ms;
     // Safely copy _millis before returning to ensure millis does not get updated while returning
     uint8_t bak = SREG;

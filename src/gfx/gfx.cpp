@@ -7,6 +7,7 @@
 #define	ILI9341_DC_PIN 9			// <= DC pin (1=data or 0=command indicator line) also called RS
 
 #include <gfx/gfx.h>
+#include <util/delay.h>
 #include <SdFat_Adafruit_Fork.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
