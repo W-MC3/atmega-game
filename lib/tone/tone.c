@@ -39,7 +39,7 @@ void timer0CompareCallback(void) {
         return;
     }
 
-    if (millis() - toneStartTime >= toneDuration && toneDoneCallback != NULL) {
+    if (scheduler_millis() - toneStartTime >= toneDuration && toneDoneCallback != NULL) {
         toneDuration = 0;
         toneDoneCallback();
     }
@@ -51,7 +51,7 @@ void setVolume(uint8_t volume) {
 
 void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void)) {
     toneDoneCallback = toneCallback;
-    toneStartTime = millis();
+    toneStartTime = scheduler_millis();
     toneDuration = duration;
     const uint32_t prescalers[] = {1, 8, 64, 256, 1024};
     const e_TIM0_ClockSource prescalerCodes[] = {

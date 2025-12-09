@@ -11,6 +11,6 @@
 
 #include <stdint.h>
 
-uint32_t millis(void);
+uint32_t scheduler_millis(void);
 
 #endif //ATMEGA_GAME_DELAY_H

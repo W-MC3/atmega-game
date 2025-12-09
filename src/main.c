@@ -213,14 +213,11 @@ void test_gfx() {
         );
 
         gfx_frame();
+        loop();
     }
 }
 
 int main() {
     start();
     test_gfx();
-
-    for (;;) {
-        loop();
-    }
 }
