@@ -14,12 +14,15 @@
 #include "hardware/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
-#include "../lib/tone/tone.h"
+#include "sound/tone.h"
 #include "math.h"
+#include "sound/sound.h"
 #include "../lib/scheduler/delay.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
+
+s_Sound main_theme;
 
 volatile uint8_t adc_value = 0;
 
@@ -41,62 +44,6 @@ void startAdc() {
     enable_adc();
     start_conversion();
 }
-
-typedef struct {
-    uint16_t frequency;  // Hz
-    uint16_t duration;   // ms
-} tone;
-
-#define _ 0  // for rests
-
-tone tetrisTheme[] = {
-    {659, 406},
-    {494, 203},
-    {523, 203},
-    {587, 406},
-    {523, 203},
-    {494, 203},
-    {440, 406},
-{1, 30},
-    {440, 203},
-    {523, 203},
-    {659, 406},
-    {587, 203},
-    {523, 203},
-    {494, 609},
-    {523, 203},
-    {587, 406},
-    {659, 406},
-    {523, 406},
-    {440, 406},
-{1, 30},
-    {440, 203},
-{1, 30},
-    {440, 203},
-    {494, 203},
-    {523, 203},
-    {587, 609},
-    {698, 203},
-    {880, 406},
-    {784, 203},
-    {698, 203},
-    {659, 609},
-    {523, 203},
-    {659, 406},
-    {587, 203},
-    {523, 203},
-    {494, 406},
-{1, 30},
-    {494, 203},
-    {523, 203},
-    {587, 406},
-    {659, 406},
-    {523, 406},
-    {440, 406},
-{1, 30},
-    {440, 406},
-};
-
 
 uint8_t toneIndex = 0;
 uint8_t toneCount = sizeof(tetrisTheme) / sizeof(tetrisTheme[0]);
@@ -137,13 +84,12 @@ void start(void) {
 
     startAdc();
 
-    gfx_init();
-
     initTone();
     playTone(100, 10, play_next_tone);
 }
 
 void loop(void) {
+    play_sound(&main_theme);
     setVolume(adc_value);
     if (nunchuk_get_state(NUNCHUK_ADDR)) {
 
@@ -156,8 +102,75 @@ void loop(void) {
     _delay_ms(20);
 }
 
+void test_gfx() {
+    main_theme = register_sound("tetris.sfd");
+    reset_sound(&main_theme);
+    play_sound(&main_theme);
+
+    gfx_bitmap_t grass = {
+        .filename = "GRASS.BMP"
+    };
+
+    gfx_bitmap_t water = {
+        .filename = "WATER.BMP"
+    };
+
+    gfx_bitmap_t tile = {
+        .filename = "TILE.BMP"
+    };
+
+    gfx_bitmap_t player_bmp = {
+        .filename = "PLAYER.BMP"
+    };
+
+    gfx_tilemap_t tilemap = {
+        .kinds = { &grass, &water, &tile },
+        .tiles = {
+            2, 2, 2, 2, 2,
+            2, 0, 0, 0, 2,
+            2, 0, 1, 0, 2,
+            2, 0, 0, 0, 2,
+            2, 2, 2, 2, 2
+        }
+    };
+
+    gfx_sprite_t player = {
+        .position = { 2, 2 },
+        .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
+        .bitmap = &player_bmp
+    };
+
+    gfx_scene_t scene = {
+        .tilemap = &tilemap,
+        .sprites = { &player },
+        .sprite_count = 1
+    };
+
+    gfx_init();
+    gfx_init_bitmap(&grass);
+    gfx_init_bitmap(&water);
+    gfx_init_bitmap(&tile);
+    gfx_init_bitmap(&player_bmp);
+    gfx_set_scene(&scene);
+
+    float angle = 0.0;
+
+    const gfx_vec2_t center = gfx_world_to_screen((gfx_vec2_t){ 2, 2 });
+
+    for (;;) {
+        angle += 0.1f;
+        gfx_move_sprite(&player,
+            center.x + (int16_t)(30.0f * cosf(angle)),
+            center.y + (int16_t)(30.0f * sinf(angle))
+        );
+
+        gfx_frame();
+    }
+}
+
 int main() {
     start();
+    test_gfx();
 
     for (;;) {
         loop();
