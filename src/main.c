@@ -15,7 +15,6 @@
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "sound/tone.h"
-#include "math.h"
 #include "sound/sound.h"
 #include "../lib/scheduler/delay.h"
 

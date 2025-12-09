@@ -9,9 +9,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "tone.h"
-
-#include <Arduino.h>
-
 #include "../hardware/uart/uart.h"
 #include "../../lib/system.h"
 #include "../hardware/Timers/timer0/timer0.h"
