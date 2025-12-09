@@ -45,21 +45,6 @@ void startAdc() {
     start_conversion();
 }
 
-uint8_t toneIndex = 0;
-uint8_t toneCount = sizeof(tetrisTheme) / sizeof(tetrisTheme[0]);
-
-void play_next_tone() {
-    if (toneIndex >= toneCount) {
-        toneIndex = 0;
-    }
-
-    uint16_t f = tetrisTheme[toneIndex].frequency;
-    uint16_t d = tetrisTheme[toneIndex].duration;
-    toneIndex++;
-
-    playTone(f, d, play_next_tone);
-}
-
 void start(void) {
     init();
 
@@ -85,7 +70,10 @@ void start(void) {
     startAdc();
 
     initTone();
-    playTone(100, 10, play_next_tone);
+
+    main_theme = register_sound("tetris.sfd");
+    reset_sound(&main_theme);
+    play_sound(&main_theme);
 }
 
 void loop(void) {
@@ -102,75 +90,9 @@ void loop(void) {
     _delay_ms(20);
 }
 
-void test_gfx() {
-    main_theme = register_sound("tetris.sfd");
-    reset_sound(&main_theme);
-    play_sound(&main_theme);
-
-    gfx_bitmap_t grass = {
-        .filename = "GRASS.BMP"
-    };
-
-    gfx_bitmap_t water = {
-        .filename = "WATER.BMP"
-    };
-
-    gfx_bitmap_t tile = {
-        .filename = "TILE.BMP"
-    };
-
-    gfx_bitmap_t player_bmp = {
-        .filename = "PLAYER.BMP"
-    };
-
-    gfx_tilemap_t tilemap = {
-        .kinds = { &grass, &water, &tile },
-        .tiles = {
-            2, 2, 2, 2, 2,
-            2, 0, 0, 0, 2,
-            2, 0, 1, 0, 2,
-            2, 0, 0, 0, 2,
-            2, 2, 2, 2, 2
-        }
-    };
-
-    gfx_sprite_t player = {
-        .position = { 2, 2 },
-        .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
-        .bitmap = &player_bmp
-    };
-
-    gfx_scene_t scene = {
-        .tilemap = &tilemap,
-        .sprites = { &player },
-        .sprite_count = 1
-    };
-
-    gfx_init();
-    gfx_init_bitmap(&grass);
-    gfx_init_bitmap(&water);
-    gfx_init_bitmap(&tile);
-    gfx_init_bitmap(&player_bmp);
-    gfx_set_scene(&scene);
-
-    float angle = 0.0;
-
-    const gfx_vec2_t center = gfx_world_to_screen((gfx_vec2_t){ 2, 2 });
-
-    for (;;) {
-        angle += 0.1f;
-        gfx_move_sprite(&player,
-            center.x + (int16_t)(30.0f * cosf(angle)),
-            center.y + (int16_t)(30.0f * sinf(angle))
-        );
-
-        gfx_frame();
-    }
-}
 
 int main() {
     start();
-    test_gfx();
 
     for (;;) {
         loop();

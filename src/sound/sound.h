@@ -10,6 +10,8 @@
 #define ATMEGA_GAME_SOUND_H
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <SdFat_Adafruit_Fork.h>
 
 /*
  * Custom file format
@@ -27,8 +29,6 @@
 #define NOTE_CHUNK_SIZE 5
 #define SFD_MAGIC "sfdV1"
 #define SFD_MAGIC_LEN 5
-
-#include <SdFat_Adafruit_Fork.h>
 
 typedef struct {
     uint16_t frequency;
