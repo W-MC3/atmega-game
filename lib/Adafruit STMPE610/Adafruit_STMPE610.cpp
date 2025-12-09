@@ -32,6 +32,7 @@
 #include <Wire.h>
 
 #include "Adafruit_STMPE610.h"
+#include <util/delay.h>
 
 static SPISettings mySPISettings;
 
@@ -118,7 +119,7 @@ boolean Adafruit_STMPE610::begin(uint8_t i2caddr) {
     }
   }
   writeRegister8(STMPE_SYS_CTRL1, STMPE_SYS_CTRL1_RESET);
-  delay(10);
+  _delay_ms(10);
 
   for (uint8_t i = 0; i < 65; i++) {
     readRegister8(i);

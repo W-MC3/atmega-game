@@ -57,11 +57,11 @@ class ArduinoInStream : public ibufstream {
     }
 
     while (1) {
-      t = millis();
+      // t = millis();
       while (!m_hw->available()) {
-        if ((millis() - t) > 10) {
-          goto done;
-        }
+        // if ((millis() - t) > 10) {
+        //   goto done;
+        // }
       }
       if (i >= (m_size - 1)) {
         setstate(failbit);

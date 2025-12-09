@@ -8,6 +8,7 @@
 
 #ifdef __AVR
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 #elif defined(ESP8266)
 #include <pgmspace.h>
 #endif
@@ -96,7 +97,7 @@ TSPoint TouchScreen::getPoint(void) {
 #endif
 
 #ifdef __arm__
-  delayMicroseconds(20); // Fast ARM chips need to allow voltages to settle
+  _delay_us(20); // Fast ARM chips need to allow voltages to settle
 #endif
 
   for (i = 0; i < NUMSAMPLES; i++) {
@@ -132,7 +133,7 @@ TSPoint TouchScreen::getPoint(void) {
 #endif
 
 #ifdef __arm__
-  delayMicroseconds(20); // Fast ARM chips need to allow voltages to settle
+  _delay_us(20); // Fast ARM chips need to allow voltages to settle
 #endif
 
   for (i = 0; i < NUMSAMPLES; i++) {

@@ -1,4 +1,5 @@
 #include "Adafruit_SPIDevice.h"
+#include <util/delay.h>
 
 // #define DEBUG_SERIAL Serial
 
@@ -193,7 +194,7 @@ void Adafruit_SPIDevice::transfer(uint8_t *buffer, size_t len) {
          b = (_dataOrder == SPI_BITORDER_LSBFIRST) ? b << 1 : b >> 1) {
 
       if (bitdelay_us) {
-        delayMicroseconds(bitdelay_us);
+        _delay_us(bitdelay_us);
       }
 
       if (_dataMode == SPI_MODE0 || _dataMode == SPI_MODE2) {
@@ -206,7 +207,7 @@ void Adafruit_SPIDevice::transfer(uint8_t *buffer, size_t len) {
         BUSIO_SET_CLOCK_HIGH();
 
         if (bitdelay_us) {
-          delayMicroseconds(bitdelay_us);
+          _delay_us(bitdelay_us);
         }
 
         if (_miso != -1) {
@@ -225,13 +226,13 @@ void Adafruit_SPIDevice::transfer(uint8_t *buffer, size_t len) {
         BUSIO_SET_CLOCK_LOW();
 
         if (bitdelay_us) {
-          delayMicroseconds(bitdelay_us);
+          _delay_us(bitdelay_us);
         }
 
         BUSIO_SET_CLOCK_HIGH();
 
         if (bitdelay_us) {
-          delayMicroseconds(bitdelay_us);
+          _delay_us(bitdelay_us);
         }
 
         if (_miso != -1) { // read on rising edge
@@ -245,7 +246,7 @@ void Adafruit_SPIDevice::transfer(uint8_t *buffer, size_t len) {
         BUSIO_SET_CLOCK_HIGH();
 
         if (bitdelay_us) {
-          delayMicroseconds(bitdelay_us);
+          _delay_us(bitdelay_us);
         }
 
         if (_mosi != -1) {
