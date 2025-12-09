@@ -97,7 +97,7 @@ uint16_t Adafruit_TSC2007::command(adafruit_tsc2007_function func,
   }
 
   // Wait 1/2ms for conversion
-  delayMicroseconds(500);
+  _delay_us(500);
 
   if (!i2c_dev->read(reply, 2)) {
     return 0;

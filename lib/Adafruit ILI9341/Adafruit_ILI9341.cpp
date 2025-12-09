@@ -47,6 +47,7 @@
  */
 
 #include "Adafruit_ILI9341.h"
+#include <util/delay.h>
 #ifndef ARDUINO_STM32_FEATHER
 #include "pins_arduino.h"
 #if !defined(RASPI) && !defined(ARDUINO_UNOR4_MINIMA) &&                       \
@@ -193,7 +194,7 @@ void Adafruit_ILI9341::begin(uint32_t freq) {
 
   if (_rst < 0) {                 // If no hardware reset pin...
     sendCommand(ILI9341_SWRESET); // Engage software reset
-    delay(150);
+    _delay_ms(150);
   }
 
   uint8_t cmd, x, numArgs;
@@ -204,7 +205,7 @@ void Adafruit_ILI9341::begin(uint32_t freq) {
     sendCommand(cmd, addr, numArgs);
     addr += numArgs;
     if (x & 0x80)
-      delay(150);
+      _delay_ms(150);
   }
 
   _width = ILI9341_TFTWIDTH;

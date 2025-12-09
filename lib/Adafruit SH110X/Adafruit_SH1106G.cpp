@@ -4,6 +4,7 @@
  */
 
 #include "Adafruit_SH110X.h"
+#include <util/delay.h>
 #include "splash.h"
 
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
@@ -170,7 +171,7 @@ bool Adafruit_SH1106G::begin(uint8_t addr, bool reset) {
     return false;
   }
 
-  delay(100);                     // 100ms delay recommended
+  _delay_ms(100);                     // 100ms delay recommended
   oled_command(SH110X_DISPLAYON); // 0xaf
 
   return true; // Success

@@ -28,7 +28,7 @@ class Timeout {
  public:
   Timeout() {}
   explicit Timeout(uint16_t ms) { set(ms); }
-  uint16_t millis16() { return millis(); }
+  uint16_t millis16() { return 0; }
   void set(uint16_t ms) { m_endTime = ms + millis16(); }
   bool timedOut() { return (int16_t)(m_endTime - millis16()) < 0; }
 
