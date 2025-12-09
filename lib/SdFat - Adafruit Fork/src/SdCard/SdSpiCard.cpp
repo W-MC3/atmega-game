@@ -24,17 +24,6 @@
  */
 #include "SdSpiCard.h"
 //==============================================================================
-class Timeout {
- public:
-  Timeout() {}
-  explicit Timeout(uint16_t ms) { set(ms); }
-  uint16_t millis16() { return 0; }
-  void set(uint16_t ms) { m_endTime = ms + millis16(); }
-  bool timedOut() { return (int16_t)(m_endTime - millis16()) < 0; }
-
- private:
-  uint16_t m_endTime;
-};
 //==============================================================================
 #if USE_SD_CRC
 // CRC functions
@@ -125,7 +114,6 @@ static uint16_t CRC_CCITT(const uint8_t* data, size_t n) {
 bool SdSpiCard::begin(SdSpiConfig spiConfig) {
   uint8_t cardType;
   uint32_t arg;
-  Timeout timeout;
   // Restore state to creator.
   initSharedSpiCard();
   m_errorCode = SD_CARD_ERROR_NONE;
@@ -151,16 +139,15 @@ bool SdSpiCard::begin(SdSpiConfig spiConfig) {
     spiReceive();
   }
   spiSelect();
-  timeout.set(SD_INIT_TIMEOUT);
   while (true) {
     // command to go idle in SPI mode
     if (cardCommand(CMD0, 0) == R1_IDLE_STATE) {
       break;
     }
-    if (timeout.timedOut()) {
-      error(SD_CARD_ERROR_CMD0);
-      goto fail;
-    }
+    // if (timeout.timedOut()) {
+    //   error(SD_CARD_ERROR_CMD0);
+    //   goto fail;
+    // }
   }
 #if USE_SD_CRC
   if (cardCommand(CMD59, 1) != R1_IDLE_STATE) {
@@ -182,19 +169,19 @@ bool SdSpiCard::begin(SdSpiConfig spiConfig) {
       cardType = SD_CARD_TYPE_SD2;
       break;
     }
-    if (timeout.timedOut()) {
-      error(SD_CARD_ERROR_CMD8);
-      goto fail;
-    }
+    // if (timeout.timedOut()) {
+    //   error(SD_CARD_ERROR_CMD8);
+    //   goto fail;
+    // }
   }
   // initialize card and send host supports SDHC if SD2
   arg = cardType == SD_CARD_TYPE_SD2 ? 0X40000000 : 0;
   while (cardAcmd(ACMD41, arg) != R1_READY_STATE) {
     // check for timeout
-    if (timeout.timedOut()) {
-      error(SD_CARD_ERROR_ACMD41);
-      goto fail;
-    }
+    // if (timeout.timedOut()) {
+    //   error(SD_CARD_ERROR_ACMD41);
+    //   goto fail;
+    // }
   }
   // if SD2 read OCR register to check for SDHC card
   if (cardType == SD_CARD_TYPE_SD2) {
@@ -362,12 +349,11 @@ bool SdSpiCard::readData(uint8_t* dst, size_t count) {
 #endif  // USE_SD_CRC
 
   // wait for start sector token
-  Timeout timeout(SD_READ_TIMEOUT);
   while ((m_status = spiReceive()) == 0XFF) {
-    if (timeout.timedOut()) {
-      error(SD_CARD_ERROR_READ_TIMEOUT);
-      goto fail;
-    }
+    // if (timeout.timedOut()) {
+    //   error(SD_CARD_ERROR_READ_TIMEOUT);
+    //   goto fail;
+    // }
   }
   if (m_status != DATA_START_SECTOR) {
     error(SD_CARD_ERROR_READ_TOKEN);
@@ -609,11 +595,10 @@ bool SdSpiCard::syncDevice() {
 }
 //------------------------------------------------------------------------------
 bool SdSpiCard::waitReady(uint16_t ms) {
-  Timeout timeout(ms);
   while (spiReceive() != 0XFF) {
-    if (timeout.timedOut()) {
-      return false;
-    }
+    // if (timeout.timedOut()) {
+    //   return false;
+    // }
   }
   return true;
 }
