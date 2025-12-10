@@ -8,15 +8,21 @@
 
 #include "sound.h"
 #include "tone.h"
+#include "delay.h"
+#include <SdFat_Adafruit_Fork.h>
+#include <new>
 
 extern SdFat32 SD;
+
+static void update_sound_playback(void *arg);
 
 // internal function: Load up to 5 notes into the buffer
 static bool load_note_chunk(s_SoundReader *r) {
     r->buffer_index = 0;
     r->buffer_count = 0;
 
-    if (!r->file) {
+    SdFile* file = static_cast<SdFile*>(r->file_handle);
+    if (!file || !file->isOpen()) {
         return false;
     }
 
@@ -27,7 +33,7 @@ static bool load_note_chunk(s_SoundReader *r) {
         }
 
         s_Note note;
-        if (r->file.read(&note, sizeof(s_Note)) != sizeof(s_Note)) {
+        if (file->read(&note, sizeof(s_Note)) != sizeof(s_Note)) {
             break;
         }
 
@@ -40,46 +46,74 @@ static bool load_note_chunk(s_SoundReader *r) {
 }
 
 s_Sound register_sound(const char *filename) {
-    s_Sound sound = (s_Sound) {
-        .frequency_offset = 0,
-        .looping = false,
-        .playing_index = 0,
-        .playing_start_time = 0,
+    s_Sound sound;
+    sound.frequency_offset = 0;
+    sound.looping = false;
+    sound.playing_index = 0;
+    sound.playing_start_time = 0;
 
-        .reader = (s_SoundReader) {
-            .filename = filename,
-            .reader_note_index = 0,
-            .buffer_count = 0,
-            .buffer_index = 0,
-        }
-    };
+    sound.reader.filename = filename;
+    sound.reader.file_handle = nullptr;
+    sound.reader.note_count = 0;
+    sound.reader.reader_note_index = 0;
+    sound.reader.buffer_count = 0;
+    sound.reader.buffer_index = 0;
+
 
     // Open file
     if (!SD.exists(filename)) {
         return sound;
     }
-    if (!sound.reader.file.open(filename, O_RDONLY)) {
+    
+    // Allocate and open file object
+    SdFile* file = static_cast<SdFile*>(::operator new(sizeof(SdFile), std::nothrow));
+    if (file) {
+        new (file) SdFile();  // placement-new construct
+    }
+    if (!file || !file->open(filename, O_RDONLY)) {
+        if (file) {
+            file->~SdFile();
+            ::operator delete(file);
+        }
         return sound;
     }
+    
+    sound.reader.file_handle = static_cast<s_FileHandle>(file);
 
     // Read magic number
     char magic[SFD_MAGIC_LEN];
-    if (sound.reader.file.read(magic, SFD_MAGIC_LEN) != SFD_MAGIC_LEN) {
+    if (file->read(magic, SFD_MAGIC_LEN) != SFD_MAGIC_LEN) {
+        file->close();
+        file->~SdFile();
+        ::operator delete(file);
+        sound.reader.file_handle = nullptr;
         return sound;
     }
     if (memcmp(magic, SFD_MAGIC, SFD_MAGIC_LEN) != 0) {
+        file->close();
+        file->~SdFile();
+        ::operator delete(file);
+        sound.reader.file_handle = nullptr;
         return sound;
     }
 
     // Read looping (8-bit)
     uint8_t looping_flag;
-    if (sound.reader.file.read(&looping_flag, 1) != 1) {
+    if (file->read(&looping_flag, 1) != 1) {
+        file->close();
+        file->~SdFile();
+        ::operator delete(file);
+        sound.reader.file_handle = nullptr;
         return sound;
     }
     sound.looping = (looping_flag != 0);
 
     // Read note count (32-bit)
-    if (sound.reader.file.read(&sound.reader.note_count, sizeof(uint32_t)) != sizeof(uint32_t)) {
+    if (file->read(&sound.reader.note_count, sizeof(uint32_t)) != sizeof(uint32_t)) {
+        file->close();
+        file->~SdFile();
+        ::operator delete(file);
+        sound.reader.file_handle = nullptr;
         return sound;
     }
 
@@ -89,17 +123,20 @@ s_Sound register_sound(const char *filename) {
     return sound;
 }
 
-// ---------------------------------------------------------------------------
-// reset_sound(): resets playback to first note
-// ---------------------------------------------------------------------------
+// reset playback to first note
 void reset_sound(s_Sound *sound_ref) {
     if (!sound_ref) {
         return;
     }
 
     s_SoundReader *r = &sound_ref->reader;
+    SdFile* file = static_cast<SdFile*>(r->file_handle);
+    
+    if (!file || !file->isOpen()) {
+        return;
+    }
 
-    r->file.seekSet(SFD_MAGIC_LEN + 1 + 4);  // magic + looping + note_count
+    file->seekSet(SFD_MAGIC_LEN + 1 + 4);  // magic + looping + note_count
     r->reader_note_index = 0;
     r->buffer_index = 0;
     r->buffer_count = 0;
@@ -107,58 +144,70 @@ void reset_sound(s_Sound *sound_ref) {
     load_note_chunk(r);
 
     sound_ref->playing_index = 0;
-    sound_ref->playing_start_time = millis();
+    sound_ref->playing_start_time = scheduler_millis();
+}
+
+// sets frequency offset
+void set_frequency_offset(s_Sound *sound_ref, uint16_t offset) {
+    sound_ref->frequency_offset = offset;
 }
 
 // ---------------------------------------------------------------------------
-// set_frequency_offset(): sets pitch offset
-// ---------------------------------------------------------------------------
-void set_frequency_offset(s_Sound *sound_ref) {
-    // This seems incomplete in your prototype. Probably intended:
-    sound_ref->frequency_offset = sound_ref->frequency_offset;
-}
-
-// ---------------------------------------------------------------------------
-// play_sound(): non-blocking — should be called each frame/tick
+// @param: s_Sound *sound_ref sound to start playing
 // ---------------------------------------------------------------------------
 void play_sound(s_Sound *sound_ref) {
     if (!sound_ref) {
         return;
     }
 
-    uint32_t now = millis();
-    s_SoundReader *r = &sound_ref->reader;
+    s_SoundReader *reader = &sound_ref->reader;
 
     // No notes available
-    if (r->buffer_count == 0) {
+    if (reader->buffer_count == 0) {
         return;
     }
 
     // Current note
-    s_Note *note = &r->note_buffer[r->buffer_index];
+    s_Note *note = &reader->note_buffer[reader->buffer_index];
 
-    // Has the note finished?
-    if (now - sound_ref->playing_start_time >= note->duration) {
-        r->buffer_index++;
-        sound_ref->playing_index++;
-        sound_ref->playing_start_time = now;
+    sound_ref->playing_start_time = scheduler_millis();
+    uint16_t freq = note->frequency + sound_ref->frequency_offset;
+    playTone(freq, note->duration, update_sound_playback, sound_ref);
+}
 
-        // Need next chunk?
-        if (r->buffer_index >= r->buffer_count) {
-            if (!load_note_chunk(r)) {
-                // End of song
-                if (sound_ref->looping) {
-                    reset_sound(sound_ref);
-                }
+static void update_sound_playback(void *arg) {
+    s_Sound *sound_ref = static_cast<s_Sound *>(arg);
+
+    if (sound_ref == nullptr) {
+        return;
+    }
+
+    s_SoundReader *reader = &sound_ref->reader;
+
+    uint32_t now = scheduler_millis();
+
+    reader->buffer_index++;
+    sound_ref->playing_index++;
+    sound_ref->playing_start_time = now;
+
+    // Need next chunk?
+    if (reader->buffer_index >= reader->buffer_count) {
+        if (!load_note_chunk(reader)) {
+            // End of song
+            reset_sound(sound_ref);
+            if (!sound_ref->looping) {
                 return;
             }
         }
-
-        note = &r->note_buffer[r->buffer_index];
     }
 
-    // Play frequency (user may replace with PWM/etc)
-    uint16_t freq = note->frequency + sound_ref->frequency_offset;
-    playTone(freq, note->duration, nullptr);  // Example. Replace with your buzzer function.
-}
+    // After possible reload, ensure index within current buffer
+    if (reader->buffer_index >= reader->buffer_count) {
+        return;
+    }
 
+    s_Note *note = &reader->note_buffer[reader->buffer_index];
+
+    uint16_t freq = note->frequency + sound_ref->frequency_offset;
+    playTone(freq, note->duration, update_sound_playback, sound_ref);
+}

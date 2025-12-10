@@ -19,7 +19,8 @@ static bool buzzerEnabled = false;
 
 uint32_t toneStartTime = 0;
 uint16_t toneDuration = 0;
-static void (*toneDoneCallback)(void) = NULL;
+static void (*toneDoneCallback)(void *arg) = NULL;
+void *argument;
 
 e_TIM0_ClockSource timer0_stored_prescaler = (e_TIM0_ClockSource)0;
 
@@ -41,7 +42,7 @@ void timer0CompareCallback(void) {
 
     if (scheduler_millis() - toneStartTime >= toneDuration && toneDoneCallback != NULL) {
         toneDuration = 0;
-        toneDoneCallback();
+        toneDoneCallback(argument);
     }
 }
 
@@ -49,10 +50,11 @@ void setVolume(uint8_t volume) {
     setOCR2B(volume);
 }
 
-void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void)) {
+void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void *), void *arg) {
     toneDoneCallback = toneCallback;
     toneStartTime = scheduler_millis();
     toneDuration = duration;
+    argument = arg;
     const uint32_t prescalers[] = {1, 8, 64, 256, 1024};
     const e_TIM0_ClockSource prescalerCodes[] = {
         TIM0_CLOCK_DEFAULT,

@@ -9,9 +9,14 @@
 #ifndef ATMEGA_GAME_SOUND_H
 #define ATMEGA_GAME_SOUND_H
 
+#ifdef __cplusplus
+#define SOUND_EXTERN_C extern "C"
+#else
+#define SOUND_EXTERN_C
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
-#include <SdFat_Adafruit_Fork.h>
 
 /*
  * Custom file format
@@ -35,9 +40,12 @@ typedef struct {
     uint16_t duration;
 } s_Note;
 
+// actual SdFile32 is managed in cpp
+typedef void* s_FileHandle;
+
 typedef struct {
     const char *filename;
-    SdFile file;
+    s_FileHandle file_handle;
 
     uint32_t note_count;
     uint32_t reader_note_index;
@@ -56,12 +64,12 @@ typedef struct {
     s_SoundReader reader;
 } s_Sound;
 
-s_Sound register_sound(char *filename);
+SOUND_EXTERN_C s_Sound register_sound(const char *filename);
 
-void reset_sound(s_Sound *sound_ref);
+SOUND_EXTERN_C void reset_sound(s_Sound *sound_ref);
 
-void play_sound(s_Sound *sound_ref);
+SOUND_EXTERN_C void play_sound(s_Sound *sound_ref);
 
-void set_frequency_offset(s_Sound *sound_ref);
+SOUND_EXTERN_C void set_frequency_offset(s_Sound *sound_ref);
 
 #endif //ATMEGA_GAME_SOUND_H

@@ -70,13 +70,14 @@ void start(void) {
 
     initTone();
 
+    // gfx init must be called before the sound code to initialize the SD card
+    gfx_init();
+
     main_theme = register_sound("tetris.sfd");
-    reset_sound(&main_theme);
     play_sound(&main_theme);
 }
 
 void loop(void) {
-    play_sound(&main_theme);
     setVolume(adc_value);
     if (nunchuk_get_state(NUNCHUK_ADDR)) {
 

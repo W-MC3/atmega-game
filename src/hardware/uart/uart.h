@@ -81,5 +81,4 @@ bool uartDataAvailable();
  */
 uint8_t readUartByte();
 
-
 #endif //CODE_UART_H

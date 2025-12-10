@@ -50,5 +50,4 @@ uint8_t read_byte(void);
  */
 bool read_line(char *outLine, uint8_t maxLen);
 
-
 #endif //CODE_PRINT_H

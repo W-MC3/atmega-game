@@ -11,6 +11,16 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 uint32_t scheduler_millis(void);
+
+void init_system_timer(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //ATMEGA_GAME_DELAY_H
