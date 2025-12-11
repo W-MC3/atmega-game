@@ -171,6 +171,11 @@ void gfx_move_sprite(gfx_sprite_t* sprite, const int16_t x, const int16_t y) {
     sprite->position.y = y;
 }
 
+void gfx_set_bitmap_sprite(gfx_sprite_t* sprite, gfx_bitmap_t* bitmap) {
+    gfx_invalidate_sprite(sprite);
+    sprite->bitmap = bitmap;
+}
+
 void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
     File32 f = SD.open(bitmap->filename);
     if (!f) return;
