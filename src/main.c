@@ -14,12 +14,14 @@
 #include "hardware/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
-#include "../lib/tone/tone.h"
-#include "math.h"
+#include "sound/tone.h"
+#include "sound/sound.h"
 #include "../lib/scheduler/delay.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
+
+s_Sound main_theme;
 
 volatile uint8_t adc_value = 0;
 
@@ -40,77 +42,6 @@ void startAdc() {
 
     enable_adc();
     start_conversion();
-}
-
-typedef struct {
-    uint16_t frequency;  // Hz
-    uint16_t duration;   // ms
-} tone;
-
-#define _ 0  // for rests
-
-tone tetrisTheme[] = {
-    {659, 406},
-    {494, 203},
-    {523, 203},
-    {587, 406},
-    {523, 203},
-    {494, 203},
-    {440, 406},
-{1, 30},
-    {440, 203},
-    {523, 203},
-    {659, 406},
-    {587, 203},
-    {523, 203},
-    {494, 609},
-    {523, 203},
-    {587, 406},
-    {659, 406},
-    {523, 406},
-    {440, 406},
-{1, 30},
-    {440, 203},
-{1, 30},
-    {440, 203},
-    {494, 203},
-    {523, 203},
-    {587, 609},
-    {698, 203},
-    {880, 406},
-    {784, 203},
-    {698, 203},
-    {659, 609},
-    {523, 203},
-    {659, 406},
-    {587, 203},
-    {523, 203},
-    {494, 406},
-{1, 30},
-    {494, 203},
-    {523, 203},
-    {587, 406},
-    {659, 406},
-    {523, 406},
-    {440, 406},
-{1, 30},
-    {440, 406},
-};
-
-
-uint8_t toneIndex = 0;
-uint8_t toneCount = sizeof(tetrisTheme) / sizeof(tetrisTheme[0]);
-
-void play_next_tone() {
-    if (toneIndex >= toneCount) {
-        toneIndex = 0;
-    }
-
-    uint16_t f = tetrisTheme[toneIndex].frequency;
-    uint16_t d = tetrisTheme[toneIndex].duration;
-    toneIndex++;
-
-    playTone(f, d, play_next_tone);
 }
 
 void start(void) {
@@ -137,10 +68,13 @@ void start(void) {
 
     startAdc();
 
+    initTone();
+
+    // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
 
-    initTone();
-    playTone(100, 10, play_next_tone);
+    main_theme = register_sound("tetris.sfd");
+    play_sound(&main_theme);
 }
 
 void loop(void) {
@@ -155,6 +89,7 @@ void loop(void) {
 
     _delay_ms(20);
 }
+
 
 int main() {
     start();

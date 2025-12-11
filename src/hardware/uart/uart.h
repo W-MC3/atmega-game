@@ -13,6 +13,10 @@
 #include <stdint.h>
 #include <avr/io.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief UART parity configuration options.
  */
@@ -81,5 +85,8 @@ bool uartDataAvailable();
  */
 uint8_t readUartByte();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif //CODE_UART_H
