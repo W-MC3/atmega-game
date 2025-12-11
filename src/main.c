@@ -17,8 +17,9 @@
 #include "sound/tone.h"
 #include "sound/sound.h"
 #include "../lib/scheduler/delay.h"
+#include "../system.h"
+#include "game/player.h"
 
-#define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
 
 s_Sound main_theme;
@@ -73,21 +74,18 @@ void start(void) {
     // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
 
+    init_player();
+
     main_theme = register_sound("tetris.sfd");
     play_sound(&main_theme);
 }
 
 void loop(void) {
+    gfx_frame();
+
+    update_player();
+
     setVolume(adc_value);
-    if (nunchuk_get_state(NUNCHUK_ADDR)) {
-
-        uint8_t joyX = state.joy_x_axis;
-        uint8_t joyY = state.joy_y_axis;
-        uint8_t z = state.z_button;
-        uint8_t c = state.c_button;
-    }
-
-    _delay_ms(20);
 }
 
 

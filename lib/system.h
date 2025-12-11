@@ -12,4 +12,6 @@
 #define FREQ_CPU 16000000UL
 #endif
 
+#define NUNCHUK_ADDR 0x52
+
 #endif //SYSTEM_H
