@@ -12,6 +12,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Initializes the printing utility with UART callbacks.
  * @param sendFunc Function to send a buffer over UART.
@@ -49,5 +53,9 @@ uint8_t read_byte(void);
  * @return true if a full line was read, else false.
  */
 bool read_line(char *outLine, uint8_t maxLen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //CODE_PRINT_H

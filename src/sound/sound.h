@@ -40,12 +40,9 @@ typedef struct {
     uint16_t duration;
 } s_Note;
 
-// actual SdFile32 is managed in cpp
-typedef void* s_FileHandle;
-
 typedef struct {
     const char *filename;
-    s_FileHandle file_handle;
+    uint32_t file_reader_pos;
 
     uint32_t note_count;
     uint32_t reader_note_index;

@@ -9,40 +9,49 @@
 #include "sound.h"
 #include "tone.h"
 #include "delay.h"
+#include "hardware/uart/uart.h"
+#include "../lib/print/print.h"
 #include <SdFat_Adafruit_Fork.h>
 #include <new>
 
 extern SdFat32 SD;
 
+// Global reader instance used for loading sound data from SD
+static SdFile fileReader;
+
 static void update_sound_playback(void *arg);
 
 // internal function: Load up to 5 notes into the buffer
-static bool load_note_chunk(s_SoundReader *r) {
-    r->buffer_index = 0;
-    r->buffer_count = 0;
+static bool load_note_chunk(s_SoundReader *reader) {
+    reader->buffer_index = 0;
+    reader->buffer_count = 0;
 
-    SdFile* file = static_cast<SdFile*>(r->file_handle);
-    if (!file || !file->isOpen()) {
+    if (!fileReader.open(reader->filename, O_RDONLY)) {
         return false;
     }
 
+    fileReader.seekSet(reader->file_reader_pos);
+
     // Read up to NOTE_CHUNK_SIZE notes
     for (uint8_t i = 0; i < NOTE_CHUNK_SIZE; i++) {
-        if (r->reader_note_index >= r->note_count) {
+        if (reader->reader_note_index >= reader->note_count) {
             break;
         }
 
         s_Note note;
-        if (file->read(&note, sizeof(s_Note)) != sizeof(s_Note)) {
+        if (fileReader.read(&note, sizeof(s_Note)) != sizeof(s_Note)) {
             break;
         }
 
-        r->note_buffer[i] = note;
-        r->reader_note_index++;
-        r->buffer_count++;
+        reader->note_buffer[i] = note;
+        reader->reader_note_index++;
+        reader->buffer_count++;
     }
 
-    return r->buffer_count > 0;
+    reader->file_reader_pos = fileReader.curPosition();
+    fileReader.close();
+
+    return reader->buffer_count > 0;
 }
 
 s_Sound register_sound(const char *filename) {
@@ -53,7 +62,7 @@ s_Sound register_sound(const char *filename) {
     sound.playing_start_time = 0;
 
     sound.reader.filename = filename;
-    sound.reader.file_handle = nullptr;
+    sound.reader.file_reader_pos = 0;
     sound.reader.note_count = 0;
     sound.reader.reader_note_index = 0;
     sound.reader.buffer_count = 0;
@@ -64,58 +73,38 @@ s_Sound register_sound(const char *filename) {
     if (!SD.exists(filename)) {
         return sound;
     }
-    
-    // Allocate and open file object
-    SdFile* file = static_cast<SdFile*>(::operator new(sizeof(SdFile), std::nothrow));
-    if (file) {
-        new (file) SdFile();  // placement-new construct
-    }
-    if (!file || !file->open(filename, O_RDONLY)) {
-        if (file) {
-            file->~SdFile();
-            ::operator delete(file);
-        }
+
+    if (!fileReader.open(filename, O_RDONLY)) {
         return sound;
     }
-    
-    sound.reader.file_handle = static_cast<s_FileHandle>(file);
 
     // Read magic number
     char magic[SFD_MAGIC_LEN];
-    if (file->read(magic, SFD_MAGIC_LEN) != SFD_MAGIC_LEN) {
-        file->close();
-        file->~SdFile();
-        ::operator delete(file);
-        sound.reader.file_handle = nullptr;
+    if (fileReader.read(magic, SFD_MAGIC_LEN) != SFD_MAGIC_LEN) {
+        fileReader.close();
         return sound;
     }
     if (memcmp(magic, SFD_MAGIC, SFD_MAGIC_LEN) != 0) {
-        file->close();
-        file->~SdFile();
-        ::operator delete(file);
-        sound.reader.file_handle = nullptr;
+        fileReader.close();
         return sound;
     }
 
     // Read looping (8-bit)
     uint8_t looping_flag;
-    if (file->read(&looping_flag, 1) != 1) {
-        file->close();
-        file->~SdFile();
-        ::operator delete(file);
-        sound.reader.file_handle = nullptr;
+    if (fileReader.read(&looping_flag, 1) != 1) {
+        fileReader.close();
         return sound;
     }
     sound.looping = (looping_flag != 0);
 
     // Read note count (32-bit)
-    if (file->read(&sound.reader.note_count, sizeof(uint32_t)) != sizeof(uint32_t)) {
-        file->close();
-        file->~SdFile();
-        ::operator delete(file);
-        sound.reader.file_handle = nullptr;
+    if (fileReader.read(&sound.reader.note_count, sizeof(uint32_t)) != sizeof(uint32_t)) {
+        fileReader.close();
         return sound;
     }
+
+    sound.reader.file_reader_pos = fileReader.curPosition();
+    fileReader.close();
 
     // Preload first chunk
     load_note_chunk(&sound.reader);
@@ -129,19 +118,21 @@ void reset_sound(s_Sound *sound_ref) {
         return;
     }
 
-    s_SoundReader *r = &sound_ref->reader;
-    SdFile* file = static_cast<SdFile*>(r->file_handle);
+    s_SoundReader *reader = &sound_ref->reader;
     
-    if (!file || !file->isOpen()) {
+    if (!fileReader.open(reader->filename, O_RDONLY)) {
         return;
     }
 
-    file->seekSet(SFD_MAGIC_LEN + 1 + 4);  // magic + looping + note_count
-    r->reader_note_index = 0;
-    r->buffer_index = 0;
-    r->buffer_count = 0;
+    fileReader.seekSet(SFD_MAGIC_LEN + 1 + 4);  // magic + looping + note_count
+    reader->reader_note_index = 0;
+    reader->buffer_index = 0;
+    reader->buffer_count = 0;
 
-    load_note_chunk(r);
+
+    fileReader.close();
+
+    load_note_chunk(reader);
 
     sound_ref->playing_index = 0;
     sound_ref->playing_start_time = scheduler_millis();
@@ -203,6 +194,7 @@ static void update_sound_playback(void *arg) {
 
     // After possible reload, ensure index within current buffer
     if (reader->buffer_index >= reader->buffer_count) {
+        print("%i, %i", reader->buffer_index, reader->buffer_count);
         return;
     }
 
