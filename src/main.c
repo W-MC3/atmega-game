@@ -1,14 +1,14 @@
 /****************************************************************************************
-* File:         uart.c
-* Author:       Michiel Dirks, Mikai Bolding
-* Created on:   20-11-2025
-* Company:      Windesheim
-* Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
-****************************************************************************************/
+ * File:         uart.c
+ * Author:       Michiel Dirks, Mikai Bolding
+ * Created on:   20-11-2025
+ * Company:      Windesheim
+ * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+ ****************************************************************************************/
 
+#include <Arduino.h>
 #include <util/delay.h>
 #include <gfx/gfx.h>
-#include <Arduino.h>
 #include "hardware/i2c/twi.h"
 #include "hardware/ADC/ADC.h"
 #include "hardware/uart/uart.h"
@@ -25,11 +25,13 @@ s_Sound main_theme;
 
 volatile uint8_t adc_value = 0;
 
-void adcCallback(const uint16_t result) {
+void adcCallback(const uint16_t result)
+{
     adc_value = result >> 8; // 8 bits is enough
 }
 
-void startAdc() {
+void startAdc()
+{
     configure_adc(&(ADC_config_t){
         .reference = AREF_EXT,
         .adjust_data_left = true,
@@ -44,23 +46,22 @@ void startAdc() {
     start_conversion();
 }
 
-void start(void) {
+void start(void)
+{
     init();
 
     TWI_Init();
 
-    initUart((uart_config_t) {
+    initUart((uart_config_t){
         .baudRate = UART_BAUDRATE,
         .parity = UART_PARITY_ODD,
         .stopBits = UART_STOP_1BIT,
-        .charSize = UART_CS_8BITS
-    });
+        .charSize = UART_CS_8BITS});
 
     print_init(
         sendUartData,
         uartDataAvailable,
-        readUartByte
-    );
+        readUartByte);
 
     nunchuk_begin(NUNCHUK_ADDR);
 
@@ -77,9 +78,11 @@ void start(void) {
     play_sound(&main_theme);
 }
 
-void loop(void) {
+void loop(void)
+{
     setVolume(adc_value);
-    if (nunchuk_get_state(NUNCHUK_ADDR)) {
+    if (nunchuk_get_state(NUNCHUK_ADDR))
+    {
 
         uint8_t joyX = state.joy_x_axis;
         uint8_t joyY = state.joy_y_axis;
@@ -90,11 +93,12 @@ void loop(void) {
     _delay_ms(20);
 }
 
-
-int main() {
+int main()
+{
     start();
 
-    for (;;) {
+    for (;;)
+    {
         loop();
     }
 }
