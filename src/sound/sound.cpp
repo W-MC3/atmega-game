@@ -1,5 +1,5 @@
 /****************************************************************************************
-* File:         sound.c
+* File:         sound.cpp
 * Author:       Michiel Dirks
 * Created on:   12-08-2025
 * Company:      Windesheim
@@ -9,15 +9,12 @@
 #include "sound.h"
 #include "tone.h"
 #include "delay.h"
-#include "hardware/uart/uart.h"
-#include "../lib/print/print.h"
 #include <SdFat_Adafruit_Fork.h>
-#include <new>
 
 extern SdFat32 SD;
 
 // Global reader instance used for loading sound data from SD
-static SdFile fileReader;
+static File32 fileReader;
 
 static void update_sound_playback(void *arg);
 
@@ -120,17 +117,11 @@ void reset_sound(s_Sound *sound_ref) {
 
     s_SoundReader *reader = &sound_ref->reader;
     
-    if (!fileReader.open(reader->filename, O_RDONLY)) {
-        return;
-    }
-
-    fileReader.seekSet(SFD_MAGIC_LEN + 1 + 4);  // magic + looping + note_count
+    // Reset reading position back to start of note data
+    reader->file_reader_pos = SFD_MAGIC_LEN + 1 + 4;  // magic + looping + note_count
     reader->reader_note_index = 0;
     reader->buffer_index = 0;
     reader->buffer_count = 0;
-
-
-    fileReader.close();
 
     load_note_chunk(reader);
 
@@ -187,6 +178,7 @@ static void update_sound_playback(void *arg) {
             // End of song
             reset_sound(sound_ref);
             if (!sound_ref->looping) {
+                playTone(0, 1, nullptr, nullptr);
                 return;
             }
         }
@@ -194,7 +186,6 @@ static void update_sound_playback(void *arg) {
 
     // After possible reload, ensure index within current buffer
     if (reader->buffer_index >= reader->buffer_count) {
-        print("%i, %i", reader->buffer_index, reader->buffer_count);
         return;
     }
 
