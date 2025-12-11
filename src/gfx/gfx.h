@@ -120,6 +120,9 @@ GFX_EXTERN_C void gfx_remove_sprite(gfx_sprite_t* sprite);
 // Moves a sprite to the given position (and invalidates it)
 GFX_EXTERN_C void gfx_move_sprite(gfx_sprite_t* sprite, int16_t x, int16_t y);
 
+// Sets the bitmap of the sprite (and invalidates it)
+GFX_EXTERN_C void gfx_set_bitmap_sprite(gfx_sprite_t* sprite, gfx_bitmap_t* bitmap);
+
 // Changes and invalidates a certain tile
 GFX_EXTERN_C void gfx_set_tile(gfx_tilemap_t* map, int16_t tx, int16_t ty, uint8_t kind);
 
