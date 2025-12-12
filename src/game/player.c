@@ -6,6 +6,8 @@
 * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
 ****************************************************************************************/
 
+#include <Arduino.h>
+
 #include "stdint.h"
 #include "delay.h"
 #include "../system.h"
@@ -13,18 +15,16 @@
 #include "gfx/gfx.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
+#define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime
 
 uint32_t last_hop_time = 0;
 
-uint32_t playtime_left_ms = 0;
+int16_t playtime_left_ms = 0; // Max 7000, we also need negative numbers so that the timer won't wrap arounds
 uint16_t score;
 
-gfx_vec2_t playerPosition;
+uint16_t current_y = 0;
 
-enum game_type {
-    RUNNER,
-    DEATH,
-};
+gfx_vec2_t playerPosition;
 
 enum DIRECTION {
     NORTH,
@@ -33,75 +33,127 @@ enum DIRECTION {
     WEST,
 };
 
-gfx_bitmap_t player_front;
-gfx_bitmap_t player_right;
-gfx_bitmap_t player_back;
-gfx_bitmap_t player_left;
+gfx_bitmap_t player_BL;
+gfx_bitmap_t player_BR;
+gfx_bitmap_t player_TL;
+gfx_bitmap_t player_TR;
 
 gfx_sprite_t player;
 
 void init_player() {
-    gfx_bitmap_t player_front = {
-        .filename = "player_front.BMP"
+    player_BL = (gfx_bitmap_t){
+        .filename = "PLAYERBL.BMP"
     };
-    gfx_bitmap_t player_right = {
-        .filename = "player_right.BMP"
+    player_BR = (gfx_bitmap_t){
+        .filename = "PLAYERBR.BMP"
     };
-    gfx_bitmap_t player_back = {
-        .filename = "player_back.BMP"
+    player_TL = (gfx_bitmap_t){
+        .filename = "PLAYERTL.BMP"
     };
-    gfx_bitmap_t player_left = {
-        .filename = "player_left.BMP"
+    player_TR = (gfx_bitmap_t){
+        .filename = "PLAYERTR.BMP"
     };
 
     player = (gfx_sprite_t){
         .position = { 0, 0 },
-        .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
-        .bitmap = &player_front
+        .size = { GFX_TILEMAP_TILE_HEIGHT, GFX_TILEMAP_TILE_HEIGHT },
+        .bitmap = &player_BL
     };
 
-    gfx_init_bitmap(&player_front);
-    gfx_init_bitmap(&player_right);
-    gfx_init_bitmap(&player_back);
-    gfx_init_bitmap(&player_left);
+    gfx_init_bitmap(&player_BL);
+    gfx_init_bitmap(&player_BR);
+    gfx_init_bitmap(&player_TL);
+    gfx_init_bitmap(&player_TR);
 
+    gfx_add_sprite(&player);
 }
 
-void start_game() {
-    playtime_left_ms = 7 * 1000; // The player starts with 7 seconds of playtime
+void player_start_game() {
+    playtime_left_ms = FULL_PLAYTIME;
+    current_y = 0;
 }
 
-void move_player(uint8_t x_stick_val, uint8_t y_stick_val) {
-    if (x_stick_val > 128 + 50) {
-        playerPosition.x += 1;
-        gfx_set_bitmap_sprite(&player, &player_front);
+void add_score() {
+    score += 1;
+
+    playtime_left_ms += 1000;
+    playtime_left_ms = min(playtime_left_ms, FULL_PLAYTIME);
+}
+
+void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
+{
+    int x = (int)x_stick_val - 128;
+    int y = (int)y_stick_val - 128;
+
+    const int DEADZONE = 70;
+
+    if (abs(x) < DEADZONE && abs(y) < DEADZONE)
+        return;
+
+    bool moved = false;
+
+    if (abs(x) > abs(y)) {
+        if (x > 0) {
+            // RIGHT
+            playerPosition.x += 1;
+            gfx_set_bitmap_sprite(&player, &player_BR);
+        } else {
+            // LEFT
+            playerPosition.x -= 1;
+            gfx_set_bitmap_sprite(&player, &player_TL);
+        }
+        moved = true;
     }
-    else if (x_stick_val < 128 - 50) {
-        playerPosition.x -= 1;
-        gfx_set_bitmap_sprite(&player, &player_right);
+    else {
+        if (y > 0) {
+            // UP
+            playerPosition.y -= 1;
+            gfx_set_bitmap_sprite(&player, &player_TR);
+        } else {
+            // DOWN
+            playerPosition.y += 1;
+            gfx_set_bitmap_sprite(&player, &player_BL);
+        }
+        moved = true;
     }
 
-    if (y_stick_val > 128 + 50) {
-        playerPosition.y += 1;
-        gfx_set_bitmap_sprite(&player, &player_back);
+    if (playerPosition.x < 0) {
+        playerPosition.x = 0;
     }
-    else if (y_stick_val < 128 - 50) {
-        playerPosition.y -= 1;
-        gfx_set_bitmap_sprite(&player, &player_left);
+    else if (playerPosition.x > 4) {
+        playerPosition.x = 4;
     }
 
-    gfx_vec2_t player_screen_pos = gfx_world_to_screen(playerPosition);
+    if (playerPosition.y < 0) {
+        playerPosition.y = 0;
+    }
+    else if (playerPosition.y > 4) {
+        playerPosition.y = 4;
+    }
 
-    gfx_move_sprite(&player,
-            player_screen_pos.x,
-            player_screen_pos.y
-        );
+    if (current_y > score) {
+        add_score();
+    }
 
+    // Move sprite on screen
+    if (moved) {
+        gfx_vec2_t player_screen_pos = gfx_world_to_screen(playerPosition);
+        gfx_move_sprite(&player, player_screen_pos.x, player_screen_pos.y);
+    }
+}
+
+
+
+
+void update_game_state() {
+    if (playtime_left_ms < 0) {
+        //game_over();
+    }
 }
 
 void update_player() {
 
-    if (scheduler_millis() - last_hop_time < TIME_BETWEEN_HOPS_MS) {
+    if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
         if (nunchuk_get_state(NUNCHUK_ADDR)) {
             last_hop_time = scheduler_millis();
 
