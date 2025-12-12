@@ -14,4 +14,6 @@ void init_player();
 
 void update_player();
 
+void player_start_game(void);
+
 #endif //ATMEGA_GAME_PLAYER_H

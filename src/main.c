@@ -45,7 +45,44 @@ void startAdc() {
     start_conversion();
 }
 
+gfx_bitmap_t grass;
+gfx_bitmap_t water;
+gfx_bitmap_t tile;
+
+gfx_tilemap_t tilemap;
+
+gfx_scene_t scene;
+
 void start(void) {
+    grass = (gfx_bitmap_t){
+        .filename = "GRASS.BMP"
+    };
+
+    water = (gfx_bitmap_t){
+        .filename = "WATER.BMP"
+    };
+
+    tile = (gfx_bitmap_t){
+        .filename = "TILE.BMP"
+    };
+
+    tilemap = (gfx_tilemap_t){
+        .kinds = { &grass, &water, &tile },
+        .tiles = {
+            2, 2, 2, 2, 2,
+            2, 0, 0, 0, 2,
+            2, 0, 1, 0, 2,
+            2, 0, 0, 0, 2,
+            2, 2, 2, 2, 2
+        }
+    };
+
+    scene = (gfx_scene_t){
+        .tilemap = &tilemap,
+        .sprites = { },
+        .sprite_count = 1
+    };
+
     init();
 
     TWI_Init();
@@ -73,17 +110,22 @@ void start(void) {
 
     // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
+    gfx_init_bitmap(&grass);
+    gfx_init_bitmap(&water);
+    gfx_init_bitmap(&tile);
+    gfx_set_scene(&scene);
 
     init_player();
 
-    main_theme = register_sound("tetris.sfd");
-    play_sound(&main_theme);
+    //main_theme = register_sound("tetris.sfd");
+    //play_sound(&main_theme);
 }
 
 void loop(void) {
-    gfx_frame();
 
     update_player();
+
+    gfx_frame();
 
     setVolume(adc_value);
 }
