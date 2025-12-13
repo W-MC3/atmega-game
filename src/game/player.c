@@ -7,11 +7,11 @@
 ****************************************************************************************/
 
 #include <Arduino.h>
+#include "player.h"
 #include "print.h"
 #include "hardware/uart/uart.h"
 #include "stdint.h"
 #include "delay.h"
-#include "game_state.h"
 #include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
@@ -28,19 +28,47 @@ uint16_t current_y = 0;
 
 gfx_vec2_t playerPosition;
 
-enum DIRECTION {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
-};
 
+// GFX //
 gfx_bitmap_t player_BL;
 gfx_bitmap_t player_BR;
 gfx_bitmap_t player_TL;
 gfx_bitmap_t player_TR;
 
+gfx_bitmap_t tile_selector;
+
 gfx_sprite_t player;
+
+// END GFX //
+
+typedef enum {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+    DIR_COUNT // Last value to keep track of enum count
+} e_DIRECTION;
+
+const gfx_bitmap_t* player_sprite_lut[GAME_TYPE_COUNT][DIR_COUNT] = {
+    // RUNNER
+    {
+        &player_BR,
+        &player_TL,
+        &player_TR,
+        &player_BL
+    },
+
+    // DEATH
+    {
+        NULL, NULL, NULL, NULL
+    }
+};
+
+
+const int8_t dx_lut[DIR_COUNT] = { +1, -1,  0,  0 };
+const int8_t dy_lut[DIR_COUNT] = {  0,  0, -1, +1 };
+
+e_GAME_TYPE current_game_type;
 
 void init_player() {
     player_BL = (gfx_bitmap_t){
@@ -56,9 +84,13 @@ void init_player() {
         .filename = "PLAYERTR.BMP"
     };
 
+    tile_selector = (gfx_bitmap_t){
+        .filename = "SELECTOR.BMP"
+    };
+
     player = (gfx_sprite_t){
         .position = { 0, 0 },
-        .size = { GFX_TILEMAP_TILE_HEIGHT, GFX_TILEMAP_TILE_HEIGHT },
+        .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
         .bitmap = &player_BL
     };
 
@@ -67,10 +99,18 @@ void init_player() {
     gfx_init_bitmap(&player_TL);
     gfx_init_bitmap(&player_TR);
 
+    gfx_init_bitmap(&tile_selector);
+
     gfx_add_sprite(&player);
 }
 
-void player_start_game() {
+void player_start_game(e_GAME_TYPE role) {
+    current_game_type = role;
+
+    if (role == DEATH) {
+        gfx_set_bitmap_sprite(&player, &tile_selector);
+    }
+
     playtime_left_ms = FULL_PLAYTIME;
     current_y = 0;
 }
@@ -89,35 +129,21 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
     const int DEADZONE = 70;
 
-    if (abs(x) < DEADZONE && abs(y) < DEADZONE)
+    if (abs(x) < DEADZONE && abs(y) < DEADZONE) {
         return;
+    }
 
-    bool moved = false;
+    e_DIRECTION dir;
 
     if (abs(x) > abs(y)) {
-        if (x > 0) {
-            // RIGHT
-            playerPosition.x += 1;
-            gfx_set_bitmap_sprite(&player, &player_BR);
-        } else {
-            // LEFT
-            playerPosition.x -= 1;
-            gfx_set_bitmap_sprite(&player, &player_TL);
-        }
-        moved = true;
+        dir = x > 0 ? NORTH : EAST;
+    } else {
+        dir = y > 0 ? SOUTH : WEST;
     }
-    else {
-        if (y > 0) {
-            // UP
-            playerPosition.y -= 1;
-            gfx_set_bitmap_sprite(&player, &player_TR);
-        } else {
-            // DOWN
-            playerPosition.y += 1;
-            gfx_set_bitmap_sprite(&player, &player_BL);
-        }
-        moved = true;
-    }
+
+    // Move
+    playerPosition.x += dx_lut[dir];
+    playerPosition.y += dy_lut[dir];
 
     if (playerPosition.x < 0) {
         playerPosition.x = 0;
@@ -133,24 +159,31 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
         playerPosition.y = 4;
     }
 
+    gfx_bitmap_t* sprite = player_sprite_lut[current_game_type][dir];
+
+    if (sprite) {
+        gfx_set_bitmap_sprite(&player, sprite);
+    }
+
     if (current_y > score) {
         add_score();
     }
 
-    // Move sprite on screen
-    if (moved) {
-        gfx_vec2_t player_screen_pos = gfx_world_to_screen(playerPosition);
-        gfx_move_sprite(&player, player_screen_pos.x, player_screen_pos.y);
-    }
+    gfx_vec2_t player_screen_pos = gfx_world_to_screen(playerPosition);
+    gfx_move_sprite(&player, player_screen_pos.x, player_screen_pos.y);
 }
 
+
 void update_game_state() {
-    uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
-    if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 0) {
-        game_over(0);
-    }
-    if (playtime_left_ms < 0) {
-        game_over(0);
+    // Death can't die
+    if (current_game_type == RUNNER) {
+        uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
+        if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 0) {
+            game_over(0);
+        }
+        if (playtime_left_ms < 0) {
+            game_over(0);
+        }
     }
 }
 

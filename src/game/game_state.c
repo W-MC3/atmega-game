@@ -22,19 +22,12 @@ enum Game_State {
 
 enum Game_State game_state = GAME_OVER;
 
-enum game_type {
-    RUNNER,
-    DEATH,
-};
-
 void save_high_score(uint16_t score) {
     // TODO: Check highscore and compare it with the current score
 }
 
-void start_game(enum game_type type) {
-    if (type == RUNNER) {
-        player_start_game();
-    }
+void start_game(e_GAME_TYPE type) {
+    player_start_game(type);
     game_state = GAME_RUNNING;
 }
 
