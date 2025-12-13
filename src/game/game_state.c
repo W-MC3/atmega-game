@@ -11,6 +11,7 @@
 #include "player.h"
 #include "print.h"
 #include "../hardware/uart/uart.h"
+#include "gfx/gfx.h"
 
 #define GAME_START_BUTTON_PIN ???
 
@@ -30,7 +31,7 @@ void save_high_score(uint16_t score) {
     // TODO: Check highscore and compare it with the current score
 }
 
-void start_game(game_type type) {
+void start_game(enum game_type type) {
     if (type == RUNNER) {
         player_start_game();
     }
@@ -40,8 +41,7 @@ void start_game(game_type type) {
 void game_over(uint16_t score) {
     game_state = GAME_OVER;
     save_high_score(score);
-    while (!txAvailable());
-    print("Game over");
+    gfx_frame();
     while (true) {}
 }
 /*

@@ -7,7 +7,8 @@
 ****************************************************************************************/
 
 #include <Arduino.h>
-
+#include "print.h"
+#include "hardware/uart/uart.h"
 #include "stdint.h"
 #include "delay.h"
 #include "game_state.h"
@@ -143,12 +144,9 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     }
 }
 
-
-
-
 void update_game_state() {
-    uint16_t tilemap_index = (playerPosition.y + 1) * GFX_TILEMAP_WIDTH + playerPosition.x + 1;
-    if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 1) {
+    uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
+    if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 0) {
         game_over(0);
     }
     if (playtime_left_ms < 0) {
@@ -168,4 +166,7 @@ void update_player() {
             move_player(joyX, joyY);
         }
     }
+
+
+    update_game_state();
 }

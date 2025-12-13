@@ -80,7 +80,7 @@ void start(void) {
         }
     };
 
-    tile_flags[12] &= 1;
+    tile_flags[12] |= TILE_DEADLY_FLAG;
 
     scene = (gfx_scene_t){
         .tilemap = &tilemap,

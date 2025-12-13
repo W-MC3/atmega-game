@@ -23,6 +23,11 @@ static bool load_note_chunk(s_SoundReader *reader) {
     reader->buffer_index = 0;
     reader->buffer_count = 0;
 
+    //TODO: restart playing and reading chink
+    if (fileReader.isBusy()) {
+        return false;
+    }
+
     if (!fileReader.open(reader->filename, O_RDONLY)) {
         return false;
     }
