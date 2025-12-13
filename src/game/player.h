@@ -10,10 +10,12 @@
 #ifndef ATMEGA_GAME_PLAYER_H
 #define ATMEGA_GAME_PLAYER_H
 
+#include "game_state.h"
+
 void init_player();
 
 void update_player();
 
-void player_start_game(void);
+void player_start_game(e_GAME_TYPE role);
 
 #endif //ATMEGA_GAME_PLAYER_H
