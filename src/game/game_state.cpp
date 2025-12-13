@@ -5,10 +5,12 @@
 * Company:      Windesheim
 * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
 ****************************************************************************************/
-/*
+
+
 #include <stdint.h>
-#include <pins.h>
 #include "player.h"
+#include "print.h"
+#include "../hardware/uart/uart.h"
 
 #define GAME_START_BUTTON_PIN ???
 
@@ -24,8 +26,8 @@ enum game_type {
     DEATH,
 };
 
-void save_high_score() {
-    // TODO: Check highscore
+void save_high_score(uint16_t score) {
+    // TODO: Check highscore and compare it with the current score
 }
 
 void start_game(game_type type) {
@@ -37,8 +39,12 @@ void start_game(game_type type) {
 
 void game_over(uint16_t score) {
     game_state = GAME_OVER;
+    save_high_score(score);
+    while (!txAvailable());
+    print("Game over");
+    while (true) {}
 }
-
+/*
 void update_game_state() {
     if (digitalRead(GAME_START_BUTTON_PIN)) {
         start_game(RUNNER);

@@ -10,6 +10,7 @@
 
 #include "stdint.h"
 #include "delay.h"
+#include "game_state.h"
 #include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
@@ -146,8 +147,12 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
 
 void update_game_state() {
+    uint16_t tilemap_index = (playerPosition.y + 1) * GFX_TILEMAP_WIDTH + playerPosition.x + 1;
+    if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 1) {
+        game_over(0);
+    }
     if (playtime_left_ms < 0) {
-        //game_over();
+        game_over(0);
     }
 }
 
