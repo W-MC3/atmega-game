@@ -19,10 +19,19 @@
 #include "../lib/scheduler/delay.h"
 #include "../system.h"
 #include "game/player.h"
+#include "game/game_state.h"
 
 #define UART_BAUDRATE 9600
 
 s_Sound main_theme;
+
+gfx_bitmap_t grass;
+gfx_bitmap_t water;
+gfx_bitmap_t tile;
+
+gfx_tilemap_t tilemap;
+
+gfx_scene_t scene;
 
 volatile uint8_t adc_value = 0;
 
@@ -45,13 +54,7 @@ void startAdc() {
     start_conversion();
 }
 
-gfx_bitmap_t grass;
-gfx_bitmap_t water;
-gfx_bitmap_t tile;
 
-gfx_tilemap_t tilemap;
-
-gfx_scene_t scene;
 
 void start(void) {
     grass = (gfx_bitmap_t){
@@ -76,6 +79,8 @@ void start(void) {
             2, 2, 2, 2, 2
         }
     };
+
+    tile_flags[12] &= 1;
 
     scene = (gfx_scene_t){
         .tilemap = &tilemap,
