@@ -15,14 +15,14 @@
 #include "../hardware/Timers/timer2/timer2.h"
 #include "../../lib/scheduler/delay.h"
 
-static bool buzzerEnabled = false;
+static volatile bool buzzerEnabled = false;
 
-uint32_t toneStartTime = 0;
-uint16_t toneDuration = 0;
-static void (*toneDoneCallback)(void *arg) = NULL;
+volatile uint32_t toneStartTime = 0;
+volatile uint16_t toneDuration = 0;
+static void (* volatile toneDoneCallback)(void *arg) = NULL;
 void *argument;
 
-e_TIM0_ClockSource timer0_stored_prescaler = (e_TIM0_ClockSource)0;
+volatile e_TIM0_ClockSource timer0_stored_prescaler = (e_TIM0_ClockSource)0;
 
 void timer0CompareCallback(void) {
     buzzerEnabled = !buzzerEnabled;
@@ -55,6 +55,11 @@ void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void *
     toneStartTime = scheduler_millis();
     toneDuration = duration;
     argument = arg;
+
+    if (frequency == 0) {
+        return;
+    }
+
     const uint32_t prescalers[] = {1, 8, 64, 256, 1024};
     const e_TIM0_ClockSource prescalerCodes[] = {
         TIM0_CLOCK_DEFAULT,
