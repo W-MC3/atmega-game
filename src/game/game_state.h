@@ -20,6 +20,8 @@ typedef enum {
 
 uint8_t tile_flags[GFX_TILEMAP_WIDTH * GFX_TILEMAP_HEIGHT];
 
+void init_scene();
+
 void start_game(e_GAME_TYPE type);
 
 void game_over(uint16_t score);
