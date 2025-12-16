@@ -74,7 +74,7 @@ void init_scene() {
     scene = (gfx_scene_t){
         .tilemap = &tilemap,
         .sprites = { },
-        .sprite_count = 1
+        .sprite_count = 0
     };
 
     gfx_init_bitmap(&grass);

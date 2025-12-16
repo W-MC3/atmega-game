@@ -82,8 +82,8 @@ void start(void) {
 
     init_player();
 
-    //main_theme = register_sound("tetris.sfd");
-    //play_sound(&main_theme);
+    main_theme = register_sound("tetris.sfd");
+    play_sound(&main_theme);
 
     start_game(RUNNER);
 }
