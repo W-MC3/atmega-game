@@ -22,6 +22,7 @@ enum Game_State {
 enum Game_State game_state = GAME_OVER;
 
 gfx_bitmap_t grass;
+gfx_bitmap_t stone;
 gfx_bitmap_t water;
 gfx_bitmap_t tile;
 
@@ -39,6 +40,10 @@ void init_scene() {
         .filename = "GRASS.BMP"
     };
 
+    stone = (gfx_bitmap_t){
+        .filename = "STONE.BMP"
+    };
+
     water = (gfx_bitmap_t){
         .filename = "WATER.BMP"
     };
@@ -48,19 +53,23 @@ void init_scene() {
     };
 
     tilemap = (gfx_tilemap_t){
-        .kinds = { &grass, &water, &tile },
+        .kinds = { &grass, &stone, &water, &tile },
         .tiles = {
-            2, 2, 2, 2, 2,
-            2, 0, 0, 0, 2,
-            2, 0, 0, 0, 2,
-            2, 0, 1, 0, 2,
-            2, 0, 0, 0, 2,
-            2, 0, 0, 0, 2,
-            2, 2, 2, 2, 2
+            3, 3, 3, 3, 3,
+            3, 0, 0, 0, 3,
+            3, 0, 2, 0, 3,
+            3, 1, 1, 0, 3,
+            3, 0, 0, 0, 3,
+            3, 0, 2, 0, 3,
+            3, 3, 3, 3, 3
         }
     };
 
-    tile_flags[17] |= TILE_DEADLY_FLAG;
+    tile_flags[12] |= TILE_DEADLY_FLAG;
+    tile_flags[27] |= TILE_DEADLY_FLAG;
+
+    tile_flags[17] |= TILE_INACCESSIBLE_FLAG;
+    tile_flags[16] |= TILE_INACCESSIBLE_FLAG;
 
     scene = (gfx_scene_t){
         .tilemap = &tilemap,
@@ -69,6 +78,7 @@ void init_scene() {
     };
 
     gfx_init_bitmap(&grass);
+    gfx_init_bitmap(&stone);
     gfx_init_bitmap(&water);
     gfx_init_bitmap(&tile);
     gfx_set_scene(&scene);
