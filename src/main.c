@@ -1,9 +1,7 @@
 /****************************************************************************************
- * File:         uart.c
+ * File:         main.c
  * Author:       Michiel Dirks, Mikai Bolding
- * Created on:   20-11-2025
- * Company:      Windesheim
- * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+ * Description:  Hardware init + game loop (Deterministic)
  ****************************************************************************************/
 
 #include <Arduino.h>
@@ -14,23 +12,21 @@
 #include "hardware/uart/uart.h"
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
+#include "../lib/scheduler/delay.h"
 #include "sound/tone.h"
 #include "sound/sound.h"
-#include "../lib/scheduler/delay.h"
+#include <world_generation/world.h>
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
 
 s_Sound main_theme;
-
 volatile uint8_t adc_value = 0;
+static gfx_scene_t game_scene;
 
-void adcCallback(const uint16_t result)
-{
-    adc_value = result >> 8; // 8 bits is enough
-}
+void adcCallback(const uint16_t result) { adc_value = result >> 8; }
 
-void startAdc()
+void startAdc(void)
 {
     configure_adc(&(ADC_config_t){
         .reference = AREF_EXT,
@@ -41,7 +37,6 @@ void startAdc()
         .interrupt_source = FREE_RUNNING,
         .callback = adcCallback,
     });
-
     enable_adc();
     start_conversion();
 }
@@ -49,33 +44,31 @@ void startAdc()
 void start(void)
 {
     init();
-
     TWI_Init();
-
-    initUart((uart_config_t){
-        .baudRate = UART_BAUDRATE,
-        .parity = UART_PARITY_ODD,
-        .stopBits = UART_STOP_1BIT,
-        .charSize = UART_CS_8BITS});
-
-    print_init(
-        sendUartData,
-        uartDataAvailable,
-        readUartByte);
-
+    initUart((uart_config_t){.baudRate = UART_BAUDRATE, .parity = UART_PARITY_ODD, .stopBits = UART_STOP_1BIT, .charSize = UART_CS_8BITS});
+    print_init(sendUartData, uartDataAvailable, readUartByte);
     nunchuk_begin(NUNCHUK_ADDR);
 
+    /*
+       GEEN analogRead seed meer!
+       We gebruiken nu de vaste tabel in world.c zodat beide Arduino's gelijk zijn.
+    */
+    world_set_seed(0); // Reset de tabel naar index 0
+
     init_system_timer();
-
     startAdc();
-
     initTone();
-
-    // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
+    world_init();
+
+    game_scene.tilemap = world_get_tilemap();
+    game_scene.sprite_count = 0;
+    gfx_set_scene(&game_scene);
 
     main_theme = register_sound("tetris.sfd");
     play_sound(&main_theme);
+
+    gfx_frame();
 }
 
 void loop(void)
@@ -83,22 +76,20 @@ void loop(void)
     setVolume(adc_value);
     if (nunchuk_get_state(NUNCHUK_ADDR))
     {
-
-        uint8_t joyX = state.joy_x_axis;
-        uint8_t joyY = state.joy_y_axis;
-        uint8_t z = state.z_button;
-        uint8_t c = state.c_button;
+        if (state.z_button)
+        {
+            world_next_level();
+            _delay_ms(200);
+        }
     }
-
+    world_update();
+    gfx_frame();
     _delay_ms(20);
 }
 
-int main()
+int main(void)
 {
     start();
-
     for (;;)
-    {
         loop();
-    }
 }
