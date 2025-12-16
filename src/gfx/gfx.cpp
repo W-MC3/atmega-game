@@ -188,8 +188,13 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
 
     int16_t start_x = max(0, rect.x - tile_x);
     int16_t start_y = max(0, rect.y - tile_y);
-    int16_t end_x = min(GFX_TILEMAP_TILE_WIDTH, rect.x + rect.width - tile_x);
-    int16_t end_y = min(GFX_TILEMAP_TILE_HEIGHT, rect.y + rect.height - tile_y);
+    int16_t end_x = min((int16_t)GFX_TILEMAP_TILE_WIDTH, (int16_t)(rect.x + rect.width - tile_x));
+    int16_t end_y = min((int16_t)GFX_TILEMAP_TILE_HEIGHT, (int16_t)(rect.y + rect.height - tile_y));
+
+    start_x = max(start_x, (int16_t)(0 - tile_x));
+    start_y = max(start_y, (int16_t)(0 - tile_y));
+    end_x = min(end_x, (int16_t)(tft.width() - tile_x));
+    end_y = min(end_y, (int16_t)(tft.height() - tile_y));
 
     if (start_x >= end_x || start_y >= end_y) {
         f.close();
@@ -221,9 +226,11 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
                 span_start = x;
             } else if ((is_transparent || x == end_x) && span_start != -1) {
                 int16_t span_width = x - span_start;
+                int16_t draw_x = tile_x + span_start;
+                int16_t draw_y = tile_y + y;
 
                 tft.startWrite();
-                tft.setAddrWindow(tile_x + span_start, tile_y + y, span_width, 1);
+                tft.setAddrWindow(draw_x, draw_y, span_width, 1);
 
                 for (int16_t sx = span_start; sx < x; sx++) {
                     const uint8_t b = row[(sx * 3) + 0];
