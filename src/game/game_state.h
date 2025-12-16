@@ -9,8 +9,8 @@
 #include "gfx/gfx.h"
 
 
-#define TILE_DEADLY_FLAG 1
-#define TILE_INACCESSIBLE_FLAG 2
+#define TILE_DEADLY_FLAG (1 << 1)
+#define TILE_INACCESSIBLE_FLAG (1 << 2)
 
 typedef enum {
     RUNNER,

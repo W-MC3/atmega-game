@@ -133,6 +133,8 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
         return;
     }
 
+    gfx_vec2_t last_position = playerPosition;
+
     e_DIRECTION dir;
 
     if (abs(x) > abs(y)) {
@@ -157,6 +159,11 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     }
     else if (playerPosition.y > GFX_TILEMAP_HEIGHT - 1) {
         playerPosition.y = GFX_TILEMAP_HEIGHT - 1;
+    }
+
+    uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
+    if ((tile_flags[tilemap_index] & TILE_INACCESSIBLE_FLAG) > 0) {
+        playerPosition = last_position;
     }
 
     const gfx_bitmap_t* sprite = player_sprite_lut[current_game_type][dir];
