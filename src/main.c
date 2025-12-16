@@ -25,14 +25,6 @@
 
 s_Sound main_theme;
 
-gfx_bitmap_t grass;
-gfx_bitmap_t water;
-gfx_bitmap_t tile;
-
-gfx_tilemap_t tilemap;
-
-gfx_scene_t scene;
-
 volatile uint8_t adc_value = 0;
 
 void adcCallback(const uint16_t result) {
@@ -57,36 +49,6 @@ void startAdc() {
 
 
 void start(void) {
-    grass = (gfx_bitmap_t){
-        .filename = "GRASS.BMP"
-    };
-
-    water = (gfx_bitmap_t){
-        .filename = "WATER.BMP"
-    };
-
-    tile = (gfx_bitmap_t){
-        .filename = "TILE.BMP"
-    };
-
-    tilemap = (gfx_tilemap_t){
-        .kinds = { &grass, &water, &tile },
-        .tiles = {
-            2, 2, 2, 2, 2,
-            2, 0, 0, 0, 2,
-            2, 0, 1, 0, 2,
-            2, 0, 0, 0, 2,
-            2, 2, 2, 2, 2
-        }
-    };
-
-    tile_flags[12] |= TILE_DEADLY_FLAG;
-
-    scene = (gfx_scene_t){
-        .tilemap = &tilemap,
-        .sprites = { },
-        .sprite_count = 1
-    };
 
     init();
 
@@ -115,10 +77,8 @@ void start(void) {
 
     // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
-    gfx_init_bitmap(&grass);
-    gfx_init_bitmap(&water);
-    gfx_init_bitmap(&tile);
-    gfx_set_scene(&scene);
+
+    init_scene();
 
     init_player();
 
@@ -126,7 +86,7 @@ void start(void) {
     //play_sound(&main_theme);
 
 
-    start_game(DEATH);
+    start_game(RUNNER);
 }
 
 void loop(void) {

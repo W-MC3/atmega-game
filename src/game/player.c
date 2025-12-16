@@ -148,21 +148,21 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     if (playerPosition.x < 0) {
         playerPosition.x = 0;
     }
-    else if (playerPosition.x > 4) {
-        playerPosition.x = 4;
+    else if (playerPosition.x > GFX_TILEMAP_WIDTH - 1) {
+        playerPosition.x = GFX_TILEMAP_WIDTH - 1;
     }
 
     if (playerPosition.y < 0) {
         playerPosition.y = 0;
     }
-    else if (playerPosition.y > 4) {
-        playerPosition.y = 4;
+    else if (playerPosition.y > GFX_TILEMAP_HEIGHT - 1) {
+        playerPosition.y = GFX_TILEMAP_HEIGHT - 1;
     }
 
-    gfx_bitmap_t* sprite = player_sprite_lut[current_game_type][dir];
+    const gfx_bitmap_t* sprite = player_sprite_lut[current_game_type][dir];
 
-    if (sprite) {
-        gfx_set_bitmap_sprite(&player, sprite);
+    if (sprite != NULL) {
+        gfx_set_bitmap_sprite(&player, (gfx_bitmap_t *)sprite);
     }
 
     if (current_y > score) {
