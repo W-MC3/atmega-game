@@ -17,7 +17,6 @@
 #include "sound/sound.h"
 #include <world_generation/world.h>
 
-#define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
 
 s_Sound main_theme;
@@ -64,6 +63,10 @@ void start(void)
     game_scene.tilemap = world_get_tilemap();
     game_scene.sprite_count = 0;
     gfx_set_scene(&game_scene);
+
+    init_scene();
+
+    init_player();
 
     main_theme = register_sound("tetris.sfd");
     // play_sound(&main_theme);
