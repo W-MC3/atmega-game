@@ -57,7 +57,7 @@ void start(void)
 
     init_system_timer();
     startAdc();
-    initTone();
+    // initTone();
     gfx_init();
     world_init();
 
@@ -66,7 +66,7 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     main_theme = register_sound("tetris.sfd");
-    play_sound(&main_theme);
+    // play_sound(&main_theme);
 
     gfx_frame();
 }

@@ -16,6 +16,7 @@ extern "C"
 #define TILE_GRASS 0
 #define TILE_WATER 1
 #define TILE_TILE 2
+#define TILE_STONE 3
 
     /* World module API */
     void world_generate_new(void);
