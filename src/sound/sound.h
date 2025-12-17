@@ -31,7 +31,7 @@
 */
 
 // How many notes to read per chunk (reduce to save RAM)
-#define NOTE_CHUNK_SIZE 10
+#define NOTE_CHUNK_SIZE 5
 #define SFD_MAGIC "sfdV1"
 #define SFD_MAGIC_LEN 5
 
