@@ -2,6 +2,15 @@
 #include <Arduino.h>
 
 /* =========================================================
+   CONFIGURATION
+   ========================================================= */
+
+#define WATER_CHANCE 25 /* Percentage kans op water tegel */
+#define STONE_CHANCE 35 /* Percentage kans op steen tegel */
+#define TRAP_ROW_1 4    /* Eerste rij met valstrikken */
+#define TRAP_ROW_2 7    /* Tweede rij met valstrikken */
+
+/* =========================================================
    BITMAPS
    ========================================================= */
 static gfx_bitmap_t bmp_grass = {"GRASS.BMP"};
@@ -70,7 +79,7 @@ void world_generate_new(void)
             bool safe_zone_top = (y >= GFX_TILEMAP_HEIGHT - 3);
 
             /* TRAP RIJEN */
-            bool is_trap_row = (y == 4 || y == 7);
+            bool is_trap_row = (y == TRAP_ROW_1 || y == TRAP_ROW_2);
 
             /* LOGICA */
             if (safe_zone_bottom || safe_zone_top)
@@ -93,9 +102,9 @@ void world_generate_new(void)
                 else
                 {
                     int r = get_fixed_random(0, 100);
-                    if (r < 25)
+                    if (r < WATER_CHANCE)
                         tile = TILE_WATER;
-                    else if (r < 35)
+                    else if (r < STONE_CHANCE)
                         tile = TILE_STONE;
 
                     else
