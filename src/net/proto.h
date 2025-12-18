@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define PROTO_PACKET_MAX_DATA_SIZE 4
+
 #define CMD_NOOP          0xFF // NO-OP
 #define CMD_NACK          0x00 // Not ACKnowledge packet
 #define CMD_ACK           0x01 // ACKnowledge packet
@@ -23,14 +25,14 @@ typedef struct proto_packet {
     uint8_t opcode;
     uint8_t id;
     uint8_t crc;
-    unsigned char data[4];
+    unsigned char data[PROTO_PACKET_MAX_DATA_SIZE];
 } proto_packet_t;
 
 // Initializes the networking subsystem
 void proto_init();
 
 // The function to call to push a byte into the networking subsystem
-void proto_recv_byte(unsigned char byte);
+void proto_recv_byte(uint8_t byte);
 
 // Check if the protocol has a completed packet
 bool proto_has_packet();
@@ -39,7 +41,7 @@ bool proto_has_packet();
 proto_packet_t proto_get_packet();
 
 // Emit a packet
-void proto_emit(uint8_t op);
+void proto_emit(uint8_t op, uint8_t data[PROTO_PACKET_MAX_DATA_SIZE]);
 
 // Get uint32_t from packet at position of idx
 uint32_t proto_get_uint32(proto_packet_t* packet, uint8_t idx);

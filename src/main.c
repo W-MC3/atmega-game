@@ -91,10 +91,7 @@ void loop(void) {
         }
     }
 
-    proto_emit({
-        .opcode = CMD_PING,
-
-    })
+    proto_emit(CMD_PING, { 0 });
 }
 
 
