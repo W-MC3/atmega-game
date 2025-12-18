@@ -29,14 +29,12 @@ static gfx_tilemap_t world_map = {
    ========================================================= */
 static uint8_t rng_counter = 0;
 
-uint8_t get_rng_value(uint8_t idx)
-{
+uint8_t get_rng_value(uint8_t idx) {
     uint16_t val = (uint16_t)(idx + 55);
     return (val * 13) >> 1;
 }
 
-int get_fixed_random(int min, int max)
-{
+int get_fixed_random(int min, int max) {
     uint8_t raw_val = get_rng_value(rng_counter++);
     int range = max - min;
     if (range <= 0)
@@ -44,15 +42,18 @@ int get_fixed_random(int min, int max)
     return (raw_val % range) + min;
 }
 
-void world_set_seed(uint32_t seed) { rng_counter = 0; }
-uint32_t world_get_seed(void) { return 0; }
+void world_set_seed(uint32_t seed) {
+    rng_counter = 0;
+}
+uint32_t world_get_seed(void) {
+    return 0;
+}
 
 /* =========================================================
    WORLD GENERATION LOGIC
    ========================================================= */
 
-void world_generate_new(void)
-{
+void world_generate_new(void) {
     int path_x = get_fixed_random(1, GFX_TILEMAP_WIDTH - 2); // Pad iets minder aan rand
 
     for (int y = GFX_TILEMAP_HEIGHT - 1; y >= 0; y--)
@@ -116,8 +117,7 @@ void world_next_level(void) {
     world_generate_new();
 }
 
-void world_init(void)
-{
+void world_init(void) {
     gfx_init_bitmap(&bmp_grass);
     gfx_init_bitmap(&bmp_water);
     gfx_init_bitmap(&bmp_tile);
