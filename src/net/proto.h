@@ -25,7 +25,7 @@ typedef struct proto_packet {
     uint8_t opcode;
     uint8_t id;
     uint8_t crc;
-    unsigned char data[PROTO_PACKET_MAX_DATA_SIZE];
+    uint8_t data[PROTO_PACKET_MAX_DATA_SIZE];
 } proto_packet_t;
 
 // Initializes the networking subsystem
