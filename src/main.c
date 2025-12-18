@@ -17,6 +17,7 @@
 #include "sound/sound.h"
 #include <world_generation/world.h>
 
+#define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
 
 s_Sound main_theme;
@@ -64,10 +65,6 @@ void start(void)
     game_scene.sprite_count = 0;
     gfx_set_scene(&game_scene);
 
-    init_scene();
-
-    init_player();
-
     main_theme = register_sound("tetris.sfd");
     // play_sound(&main_theme);
 
@@ -77,20 +74,16 @@ void start(void)
 void loop(void)
 {
     setVolume(adc_value);
-
-    /* Input lezen */
     if (nunchuk_get_state(NUNCHUK_ADDR))
     {
         if (state.z_button)
         {
             world_next_level();
-            _delay_ms(200); /* Anti-dender vertraging */
+            _delay_ms(200);
         }
     }
-
-    /* === BELANGRIJK: DEZE REGELS ONTBREKEN === */
-    gfx_frame();   /* Teken het (nieuwe) level op het scherm */
-    _delay_ms(20); /* Game loop snelheid reguleren */
+    gfx_frame();
+    _delay_ms(20);
 }
 
 int main(void)
