@@ -11,8 +11,9 @@
 #define PROTO_PACKET_MAX_DATA_SIZE 4
 
 #define CMD_NOOP          0xFF // NO-OP
-#define CMD_NACK          0x00 // Not ACKnowledge packet
-#define CMD_ACK           0x01 // ACKnowledge packet
+// note: can be added if needed later on, realistically, it may not make sense... ~mikaib
+// #define CMD_NACK          0x00 // Not ACKnowledge packet
+// #define CMD_ACK           0x01 // ACKnowledge packet
 #define CMD_PING          0x02 // Ping packet (no data)
 #define CMD_SEED          0x03 // RNG seed (1x uint32_t)
 #define CMD_MOVE          0x04 // Player pos (2x uint8_t)

@@ -46,14 +46,9 @@ void startAdc() {
     start_conversion();
 }
 
-
-
 void start(void) {
-
     init();
-
-    TWI_Init();
-
+    // TWI_Init();
     initUart((uart_config_t) {
         .baudRate = UART_BAUDRATE,
         .parity = UART_PARITY_ODD,
@@ -61,35 +56,49 @@ void start(void) {
         .charSize = UART_CS_8BITS
     });
 
-    nunchuk_begin(NUNCHUK_ADDR);
+    // nunchuk_begin(NUNCHUK_ADDR);
 
-    init_system_timer();
-    startAdc();
-    initTone();
+    // init_system_timer();
+    // startAdc();
+    // initTone();
 
     // gfx init must be called before the sound code to initialize the SD card
-    gfx_init();
-    init_scene();
-    init_player();
+    // gfx_init();
+    // init_scene();
+    // init_player();
 
     //main_theme = register_sound("tetris.sfd");
     //play_sound(&main_theme);
 
+    DDRB |= (1 << DDB5);
+
     proto_init();
-    start_game(RUNNER);
+    // start_game(RUNNER);
 }
 
 void loop(void) {
-    update_player();
-    gfx_frame();
-    setVolume(adc_value);
+    // update_player();
+    // gfx_frame();
+    // setVolume(adc_value);
+
+    while (uartDataAvailable()) {
+        proto_recv_byte(readUartByte());
+    }
 
     while (proto_has_packet()) {
         proto_packet_t p = proto_get_packet();
-        if (p.opcode == CMD_PING) {
 
+        switch (p.opcode) {
+            case CMD_PING:
+                PORTB ^= (1 << PORTB5);
+                break;
+
+            default:
+                break;
         }
     }
+
+    _delay_ms(1000);
 
     uint8_t data[4] = { 0 };
     proto_emit(CMD_PING, data);
