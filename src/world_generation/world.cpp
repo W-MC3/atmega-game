@@ -5,10 +5,15 @@
    CONFIGURATION
    ========================================================= */
 
-#define WATER_CHANCE 25 /* Percentage kans op water tegel */
-#define STONE_CHANCE 35 /* Percentage kans op steen tegel */
+#define WATER_CHANCE 30 /* Percentage kans op water tegel */
+#define STONE_CHANCE 40 /* Percentage kans op steen tegel */
 #define TRAP_ROW_1 4    /* Eerste rij met valstrikken */
 #define TRAP_ROW_2 7    /* Tweede rij met valstrikken */
+
+#define TILE_GRASS 0
+#define TILE_WATER 1
+#define TILE_TILE 2
+#define TILE_STONE 3
 
 /* =========================================================
    BITMAPS
@@ -27,19 +32,25 @@ static gfx_tilemap_t world_map = {
     {0}};
 
 /* =========================================================
-   DETERMINISTIC RNG
+   PSEUDO RANDOM NUMBER GENERATION (PRNG)
    ========================================================= */
-static const uint8_t rng_pool[30] = {
-    42, 189, 7, 201, 55, 99, 12, 230, 150, 76,
-    88, 33, 111, 250, 19, 145, 67, 200, 10, 123,
-    5, 212, 90, 178, 44, 160, 29, 81, 255, 14};
+static uint8_t rng_counter = 0;
 
-static int rng_index = 0;
+/*
+   PRNG Functie zoals gevraagd:
+   Gebruikt index + offset, vermenigvuldigt met 13 en shift naar rechts.
+   Dit vervangt de vaste array.
+*/
+uint8_t get_rng_value(uint8_t idx)
+{
+    /* We voegen 55 toe als 'seed' offset om variatie te garanderen */
+    uint16_t val = (uint16_t)(idx + 55);
+    return (val * 13) >> 1;
+}
 
 int get_fixed_random(int min, int max)
 {
-    uint8_t raw_val = rng_pool[rng_index];
-    rng_index = (rng_index + 1) % 30;
+    uint8_t raw_val = get_rng_value(rng_counter++);
 
     int range = max - min;
     if (range <= 0)
@@ -48,7 +59,11 @@ int get_fixed_random(int min, int max)
     return (raw_val % range) + min;
 }
 
-void world_set_seed(uint32_t seed) { rng_index = 0; }
+void world_set_seed(uint32_t seed)
+{
+    rng_counter = 0;
+}
+
 uint32_t world_get_seed(void) { return 0; }
 
 /* =========================================================
@@ -61,7 +76,7 @@ void world_generate_new(void)
 
     for (int y = GFX_TILEMAP_HEIGHT - 1; y >= 0; y--)
     {
-        /* Pad berekening */
+        /* Pad berekening (loopt altijd door voor continuïteit) */
         int r_dir = get_fixed_random(0, 3);
         path_x += (r_dir - 1);
 
@@ -81,15 +96,14 @@ void world_generate_new(void)
             /* TRAP RIJEN */
             bool is_trap_row = (y == TRAP_ROW_1 || y == TRAP_ROW_2);
 
-            /* LOGICA */
             if (safe_zone_bottom || safe_zone_top)
             {
                 tile = TILE_GRASS;
             }
             else if (is_trap_row)
             {
-                /* === DE MASSIEVE MUUR === */
-                /* GEEN uitzondering meer voor het pad! Alles is Trap. */
+                /* === MASSIEVE MUUR === */
+                /* Hier skippen we het veilige pad: ALLES wordt trap */
                 tile = TILE_TILE;
             }
             else
@@ -97,7 +111,7 @@ void world_generate_new(void)
                 /* Normale rijen */
                 if (x == path_x)
                 {
-                    tile = TILE_GRASS;
+                    tile = TILE_GRASS; /* Veilig pad */
                 }
                 else
                 {
@@ -106,7 +120,6 @@ void world_generate_new(void)
                         tile = TILE_WATER;
                     else if (r < STONE_CHANCE)
                         tile = TILE_STONE;
-
                     else
                         tile = TILE_GRASS;
                 }
@@ -135,13 +148,8 @@ void world_init(void)
     gfx_init_bitmap(&bmp_tile);
     gfx_init_bitmap(&bmp_rock);
 
-    rng_index = 0;
+    world_set_seed(0);
     world_generate_new();
-}
-
-void world_update(void)
-{
-    /* Statisch */
 }
 
 gfx_tilemap_t *world_get_tilemap(void)

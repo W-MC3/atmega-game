@@ -74,17 +74,20 @@ void start(void)
 void loop(void)
 {
     setVolume(adc_value);
+
+    /* Input lezen */
     if (nunchuk_get_state(NUNCHUK_ADDR))
     {
         if (state.z_button)
         {
             world_next_level();
-            _delay_ms(200);
+            _delay_ms(200); /* Anti-dender vertraging */
         }
     }
-    world_update();
-    gfx_frame();
-    _delay_ms(20);
+
+    /* === BELANGRIJK: DEZE REGELS ONTBREKEN === */
+    gfx_frame();   /* Teken het (nieuwe) level op het scherm */
+    _delay_ms(20); /* Game loop snelheid reguleren */
 }
 
 int main(void)

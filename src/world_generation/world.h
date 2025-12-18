@@ -32,8 +32,6 @@ extern "C"
     void world_regenerate_and_respawn(gfx_sprite_t *player);
     bool world_is_regenerating(void);
 
-    /* Called each loop to update world state (scrolling, etc.) */
-    void world_update(void);
     void world_next_level(void);
 
 #ifdef __cplusplus
