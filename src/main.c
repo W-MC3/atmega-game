@@ -15,7 +15,10 @@
 #include "../lib/scheduler/delay.h"
 #include "sound/tone.h"
 #include "sound/sound.h"
-#include <world_generation/world.h>
+#include "world_generation/world.h"
+#include "game/player.h"
+#include "game/game_state.h"
+#include "resources.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 9600
@@ -64,15 +67,15 @@ void start(void)
     game_scene.tilemap = world_get_tilemap();
     game_scene.sprite_count = 0;
     gfx_set_scene(&game_scene);
+    main_theme = register_sound(ZELDA);
+    play_sound(&main_theme);
 
-    main_theme = register_sound("tetris.sfd");
-    // play_sound(&main_theme);
-
-    gfx_frame();
+    start_game(RUNNER);
 }
 
 void loop(void)
 {
+    update_player();
     setVolume(adc_value);
     if (nunchuk_get_state(NUNCHUK_ADDR))
     {

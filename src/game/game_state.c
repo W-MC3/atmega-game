@@ -11,8 +11,8 @@
 #include "game_state.h"
 #include "player.h"
 #include "print.h"
-#include "../hardware/uart/uart.h"
 #include "gfx/gfx.h"
+#include "resources.h"
 
 enum Game_State {
     GAME_RUNNING,
@@ -37,19 +37,19 @@ void save_high_score(uint16_t score) {
 
 void init_scene() {
     grass = (gfx_bitmap_t){
-        .filename = "GRASS.BMP"
+        .filename = GRASS_TILE
     };
 
     stone = (gfx_bitmap_t){
-        .filename = "STONE.BMP"
+        .filename = STONE_TILE
     };
 
     water = (gfx_bitmap_t){
-        .filename = "WATER.BMP"
+        .filename = WATER_TILE
     };
 
     tile = (gfx_bitmap_t){
-        .filename = "TILE.BMP"
+        .filename = CHECKERBOARD_TILE
     };
 
     tilemap = (gfx_tilemap_t){

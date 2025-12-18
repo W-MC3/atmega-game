@@ -65,11 +65,9 @@ int gfx_init_bitmap(gfx_bitmap_t* bitmap) {
     return 0;
 }
 
-void gfx_frame()
-{
+void gfx_frame() {
     // exit if no scene is defined
-    if (active_scene == NULL)
-    {
+    if (active_scene == NULL) {
         return;
     }
 
@@ -80,10 +78,8 @@ void gfx_frame()
         sei();
 
         // iterate over all tiles and draw them, clip is set to GFX_FULLSCREEN
-        for (int16_t tx = 0; tx < GFX_TILEMAP_WIDTH; tx++)
-        {
-            for (int16_t ty = 0; ty < GFX_TILEMAP_HEIGHT; ty++)
-            {
+        for (int16_t tx = 0; tx < GFX_TILEMAP_WIDTH; tx++) {
+            for (int16_t ty = 0; ty < GFX_TILEMAP_HEIGHT; ty++) {
                 const int idx = ty * GFX_TILEMAP_WIDTH + tx;
                 const int tile = active_scene->tilemap->tiles[idx];
 
@@ -96,8 +92,7 @@ void gfx_frame()
     }
 
     // iterate over dirty rects
-    for (uint8_t i = 0; i < dirty_rects_count; i++)
-    {
+    for (uint8_t i = 0; i < dirty_rects_count; i++) {
         gfx_rect_t *rect = &dirty_rects[i];
 
         // bottom-right corner
@@ -117,10 +112,8 @@ void gfx_frame()
         int16_t ty_max = max(max(c0.y, c1.y), max(c2.y, c3.y));
 
         // we iterate over all tiles and redraw with the dirty rect as the clip area.
-        for (int16_t tx = tx_min; tx <= tx_max; tx++)
-        {
-            for (int16_t ty = ty_min; ty <= ty_max; ty++)
-            {
+        for (int16_t tx = tx_min; tx <= tx_max; tx++) {
+            for (int16_t ty = ty_min; ty <= ty_max; ty++) {
                 if (tx < 0 || ty < 0 || tx >= GFX_TILEMAP_WIDTH || ty >= GFX_TILEMAP_HEIGHT)
                     continue;
                 const int idx = ty * GFX_TILEMAP_WIDTH + tx; // (x, y) -> idx
@@ -136,8 +129,7 @@ void gfx_frame()
         gfx_sprite_t *sprite = active_scene->sprites[i];
 
         // redraw if dirty
-        if ((sprite->flags & GFX_DIRTY_BIT) != 0)
-        {
+        if ((sprite->flags & GFX_DIRTY_BIT) != 0) {
             gfx_draw_sprite(sprite);
 
             // remove dirty bit
@@ -157,15 +149,12 @@ void gfx_reset() {
     sei();
 }
 
-bool gfx_add_sprite(gfx_sprite_t *sprite)
-{
-    if (active_scene == NULL)
-    {
+bool gfx_add_sprite(gfx_sprite_t *sprite) {
+    if (active_scene == NULL) {
         return false;
     }
 
-    if (active_scene->sprite_count >= GFX_SCENE_MAX_SPRITES)
-    {
+    if (active_scene->sprite_count >= GFX_SCENE_MAX_SPRITES) {
         return false;
     }
 
@@ -177,12 +166,9 @@ bool gfx_add_sprite(gfx_sprite_t *sprite)
 
 void gfx_remove_sprite(gfx_sprite_t *sprite)
 {
-    for (uint8_t i = 0; i < active_scene->sprite_count; i++)
-    {
-        if (active_scene->sprites[i] == sprite)
-        {
-            for (uint8_t j = i; j < active_scene->sprite_count - 1; j++)
-            {
+    for (uint8_t i = 0; i < active_scene->sprite_count; i++) {
+        if (active_scene->sprites[i] == sprite) {
+            for (uint8_t j = i; j < active_scene->sprite_count - 1; j++) {
                 active_scene->sprites[j] = active_scene->sprites[j + 1];
             }
             active_scene->sprite_count--;
@@ -228,15 +214,13 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
     end_x = min(end_x, (int16_t)(tft.width() - tile_x));
     end_y = min(end_y, (int16_t)(tft.height() - tile_y));
 
-    if (start_x >= end_x || start_y >= end_y)
-    {
+    if (start_x >= end_x || start_y >= end_y) {
         f.close();
         sei();
         return;
     }
 
-    for (int16_t y = GFX_TILEMAP_TILE_HEIGHT - 1; y >= 0; y--)
-    {
+    for (int16_t y = GFX_TILEMAP_TILE_HEIGHT - 1; y >= 0; y--) {
         if (y < start_y || y >= end_y)
             continue;
 
@@ -246,28 +230,21 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
 
         int16_t span_start = -1;
 
-        for (int16_t x = start_x; x <= end_x; x++)
-        {
+        for (int16_t x = start_x; x <= end_x; x++) {
             bool is_transparent = false;
 
-            if (x < end_x)
-            {
+            if (x < end_x) {
                 const uint8_t b = row[(x * 3) + 0];
                 const uint8_t g = row[(x * 3) + 1];
                 const uint8_t r = row[(x * 3) + 2];
                 is_transparent = ((r | g | b) == 0);
-            }
-            else
-            {
+            } else {
                 is_transparent = true;
             }
 
-            if (!is_transparent && span_start == -1)
-            {
+            if (!is_transparent && span_start == -1) {
                 span_start = x;
-            }
-            else if ((is_transparent || x == end_x) && span_start != -1)
-            {
+            } else if ((is_transparent || x == end_x) && span_start != -1) {
                 int16_t span_width = x - span_start;
                 int16_t draw_x = tile_x + span_start;
                 int16_t draw_y = tile_y + y;
@@ -275,8 +252,7 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
                 tft.startWrite();
                 tft.setAddrWindow(draw_x, draw_y, span_width, 1);
 
-                for (int16_t sx = span_start; sx < x; sx++)
-                {
+                for (int16_t sx = span_start; sx < x; sx++) {
                     const uint8_t b = row[(sx * 3) + 0];
                     const uint8_t g = row[(sx * 3) + 1];
                     const uint8_t r = row[(sx * 3) + 2];
@@ -307,43 +283,34 @@ void gfx_draw_sprite(gfx_sprite_t* sprite) {
     const int16_t sprite_x = sprite->position.x - (sprite->size.x / 2);
     const int16_t sprite_y = sprite->position.y;
 
-    for (int16_t y = sprite->size.y - 1; y >= 0; y--)
-    {
+    for (int16_t y = sprite->size.y - 1; y >= 0; y--) {
         uint32_t rowOffset = sprite->bitmap->offset + (uint32_t)(sprite->size.y - 1 - y) * sprite->bitmap->row_size;
         f.seek(rowOffset);
         f.read(row, sprite->bitmap->row_size);
 
         int16_t span_start = -1;
 
-        for (int16_t x = 0; x <= sprite->size.x; x++)
-        {
+        for (int16_t x = 0; x <= sprite->size.x; x++) {
             bool is_transparent = false;
 
-            if (x < sprite->size.x)
-            {
+            if (x < sprite->size.x) {
                 const uint8_t b = row[(x * 3) + 0];
                 const uint8_t g = row[(x * 3) + 1];
                 const uint8_t r = row[(x * 3) + 2];
                 is_transparent = ((r | g | b) == 0);
-            }
-            else
-            {
+            } else {
                 is_transparent = true;
             }
 
-            if (!is_transparent && span_start == -1)
-            {
+            if (!is_transparent && span_start == -1) {
                 span_start = x;
-            }
-            else if ((is_transparent || x == sprite->size.x) && span_start != -1)
-            {
+            } else if ((is_transparent || x == sprite->size.x) && span_start != -1) {
                 int16_t span_width = x - span_start;
 
                 tft.startWrite();
                 tft.setAddrWindow(sprite_x + span_start, sprite_y + y, span_width, 1);
 
-                for (int16_t sx = span_start; sx < x; sx++)
-                {
+                for (int16_t sx = span_start; sx < x; sx++) {
                     const uint8_t b = row[(sx * 3) + 0];
                     const uint8_t g = row[(sx * 3) + 1];
                     const uint8_t r = row[(sx * 3) + 2];
@@ -361,10 +328,8 @@ void gfx_draw_sprite(gfx_sprite_t* sprite) {
     sei();
 }
 
-void gfx_set_tilemap(gfx_tilemap_t *map)
-{
-    if (active_scene == NULL)
-    {
+void gfx_set_tilemap(gfx_tilemap_t *map) {
+    if (active_scene == NULL) {
         return;
     }
 
@@ -372,24 +337,20 @@ void gfx_set_tilemap(gfx_tilemap_t *map)
     gfx_invalidate_tilemap(map);
 }
 
-void gfx_set_scene(gfx_scene_t *scene)
-{
+void gfx_set_scene(gfx_scene_t *scene) {
     active_scene = scene;
     gfx_invalidate_tilemap(scene->tilemap);
 }
 
-void gfx_invalidate_tilemap(gfx_tilemap_t *map)
-{
+void gfx_invalidate_tilemap(gfx_tilemap_t *map) {
     map->flags |= GFX_DIRTY_BIT;
 
-    for (uint8_t i = 0; i < active_scene->sprite_count; i++)
-    {
+    for (uint8_t i = 0; i < active_scene->sprite_count; i++) {
         gfx_invalidate_sprite(active_scene->sprites[i]);
     }
 }
 
-void gfx_push_dirty_rect(const int16_t x, const int16_t y, const int16_t width, const int16_t height)
-{
+void gfx_push_dirty_rect(const int16_t x, const int16_t y, const int16_t width, const int16_t height) {
     dirty_rects[dirty_rects_count++] = (gfx_rect_t){
         .x = x,
         .y = y,
@@ -397,10 +358,8 @@ void gfx_push_dirty_rect(const int16_t x, const int16_t y, const int16_t width, 
         .height = height};
 }
 
-void gfx_invalidate_tile(gfx_tilemap_t *map, const int16_t tx, const int16_t ty)
-{
-    if (map != active_scene->tilemap)
-    {
+void gfx_invalidate_tile(gfx_tilemap_t *map, const int16_t tx, const int16_t ty) {
+    if (map != active_scene->tilemap) {
         return;
     }
 
@@ -412,14 +371,12 @@ void gfx_invalidate_tile(gfx_tilemap_t *map, const int16_t tx, const int16_t ty)
         GFX_TILEMAP_TILE_HEIGHT);
 }
 
-void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind)
-{
+void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind) {
     map->tiles[ty * GFX_TILEMAP_WIDTH + tx] = kind;
     gfx_invalidate_tile(map, tx, ty);
 }
 
-void gfx_invalidate_sprite(gfx_sprite_t *sprite)
-{
+void gfx_invalidate_sprite(gfx_sprite_t *sprite) {
     sprite->flags |= GFX_DIRTY_BIT;
     gfx_push_dirty_rect(
         sprite->position.x - (sprite->size.x / 2),
@@ -428,8 +385,7 @@ void gfx_invalidate_sprite(gfx_sprite_t *sprite)
         sprite->size.y);
 }
 
-gfx_vec2_t gfx_world_to_screen(const gfx_vec2_t vec)
-{
+gfx_vec2_t gfx_world_to_screen(const gfx_vec2_t vec) {
     const int16_t x = (vec.x - vec.y) * GFX_TILEMP_TILE_HALF_WIDTH;
     const int16_t y = (vec.x + vec.y) * GFX_TILEMP_TILE_HALF_HEIGHT;
 
@@ -438,8 +394,7 @@ gfx_vec2_t gfx_world_to_screen(const gfx_vec2_t vec)
         .y = (short)(y + tft.height() / 4)};
 }
 
-gfx_vec2_t gfx_screen_to_world(const gfx_vec2_t vec)
-{
+gfx_vec2_t gfx_screen_to_world(const gfx_vec2_t vec) {
     const float centered_x = vec.x - (tft.width());
     const float centered_y = vec.y - (tft.height() / 4.0f);
 
