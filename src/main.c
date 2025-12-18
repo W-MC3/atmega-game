@@ -80,7 +80,7 @@ void start(void)
 
     init_player();
     main_theme = register_sound(ZELDA);
-    play_sound(&main_theme);
+    //play_sound(&main_theme);
 
     start_game(RUNNER);
 }
