@@ -1,5 +1,5 @@
 #include "world.h"
-#include <Arduino.h>
+#include "resources.h"
 
 /* =========================================================
    CONFIGURATION
@@ -10,23 +10,19 @@
 #define TRAP_ROW_1 4
 #define TRAP_ROW_2 7
 
-#define TILE_GRASS 0
-#define TILE_WATER 1
-#define TILE_TILE 2
-#define TILE_STONE 3
-
 /* =========================================================
    BITMAPS
    ========================================================= */
-static gfx_bitmap_t bmp_grass = {"GRASS.BMP"};
-static gfx_bitmap_t bmp_water = {"WATER.BMP"};
-static gfx_bitmap_t bmp_tile = {"TILE.BMP"};
-static gfx_bitmap_t bmp_rock = {"STONE.bmp"};
+static gfx_bitmap_t bmp_grass = {GRASS_TILE};
+static gfx_bitmap_t bmp_water = {WATER_TILE};
+static gfx_bitmap_t bmp_tile = {CHECKERBOARD_TILE};
+static gfx_bitmap_t bmp_rock = {STONE_TILE};
 
 static gfx_tilemap_t world_map = {
     GFX_DIRTY_BIT,
     {&bmp_grass, &bmp_water, &bmp_tile, &bmp_rock},
-    {0}};
+    {0}
+};
 
 /* =========================================================
    PRNG
@@ -116,7 +112,9 @@ void world_generate_new(void)
     world_map.flags |= GFX_DIRTY_BIT;
 }
 
-void world_next_level(void) { world_generate_new(); }
+void world_next_level(void) {
+    world_generate_new();
+}
 
 void world_init(void)
 {
@@ -129,4 +127,6 @@ void world_init(void)
     world_generate_new();
 }
 
-gfx_tilemap_t *world_get_tilemap(void) { return &world_map; }
+gfx_tilemap_t *world_get_tilemap(void) {
+    return &world_map;
+}
