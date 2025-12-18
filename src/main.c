@@ -12,7 +12,6 @@
 #include "hardware/i2c/twi.h"
 #include "hardware/ADC/ADC.h"
 #include "hardware/uart/uart.h"
-#include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "sound/tone.h"
 #include "sound/sound.h"
@@ -20,6 +19,7 @@
 #include "../system.h"
 #include "game/player.h"
 #include "game/game_state.h"
+#include "net/proto.h"
 
 #define UART_BAUDRATE 9600
 
@@ -61,40 +61,40 @@ void start(void) {
         .charSize = UART_CS_8BITS
     });
 
-    print_init(
-        sendUartData,
-        uartDataAvailable,
-        readUartByte
-    );
-
     nunchuk_begin(NUNCHUK_ADDR);
 
     init_system_timer();
-
     startAdc();
-
     initTone();
 
     // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
-
     init_scene();
-
     init_player();
 
     //main_theme = register_sound("tetris.sfd");
     //play_sound(&main_theme);
 
+    proto_init();
     start_game(RUNNER);
 }
 
 void loop(void) {
-
     update_player();
-
     gfx_frame();
-
     setVolume(adc_value);
+
+    while (proto_has_packet()) {
+        proto_packet_t p = proto_get_packet();
+        if (p.opcode == CMD_PING) {
+
+        }
+    }
+
+    proto_emit({
+        .opcode = CMD_PING,
+
+    })
 }
 
 
