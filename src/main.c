@@ -91,7 +91,8 @@ void loop(void) {
         }
     }
 
-    proto_emit(CMD_PING, { 0 });
+    uint8_t data[4] = { 0 };
+    proto_emit(CMD_PING, data);
 }
 
 
