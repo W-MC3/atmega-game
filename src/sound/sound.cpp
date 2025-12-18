@@ -23,6 +23,10 @@ static bool load_note_chunk(s_SoundReader *reader) {
     reader->buffer_index = 0;
     reader->buffer_count = 0;
 
+    if (fileReader.isBusy()) {
+        return false;
+    }
+
     if (!fileReader.open(reader->filename, O_RDONLY)) {
         return false;
     }
@@ -175,10 +179,17 @@ static void update_sound_playback(void *arg) {
     // Need next chunk?
     if (reader->buffer_index >= reader->buffer_count) {
         if (!load_note_chunk(reader)) {
-            // End of song
-            reset_sound(sound_ref);
-            if (!sound_ref->looping) {
-                playTone(0, 1, nullptr, nullptr);
+            // Distinguish between true end-of-song and SD still being busy.
+            if (reader->reader_note_index >= reader->note_count) {
+                // End of song
+                reset_sound(sound_ref);
+                if (!sound_ref->looping) {
+                    playTone(0, 1, nullptr, nullptr);
+                    return;
+                }
+            } else {
+                // SD is busy; schedule a very short silent tone to retry loading
+                playTone(0, 1, update_sound_playback, sound_ref);
                 return;
             }
         }
