@@ -1,8 +1,10 @@
 /****************************************************************************************
  * File:         main.c
- * Author:       Michiel Dirks, Mikai Bolding
- * Description:  Hardware init + game loop (Deterministic)
- ****************************************************************************************/
+ * Authors:       Michiel Dirks, Mikai Bolding, Daniël Kool
+* Created on:   20-11-2025
+* Company:      Windesheim
+* Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
+****************************************************************************************/
 
 #include <Arduino.h>
 #include <util/delay.h>
@@ -67,6 +69,9 @@ void start(void)
     game_scene.tilemap = world_get_tilemap();
     game_scene.sprite_count = 0;
     gfx_set_scene(&game_scene);
+    init_scene();
+
+    init_player();
     main_theme = register_sound(ZELDA);
     play_sound(&main_theme);
 
