@@ -50,26 +50,33 @@ void start(void)
 {
     init();
     TWI_Init();
-    initUart((uart_config_t){.baudRate = UART_BAUDRATE, .parity = UART_PARITY_ODD, .stopBits = UART_STOP_1BIT, .charSize = UART_CS_8BITS});
-    print_init(sendUartData, uartDataAvailable, readUartByte);
+    initUart((uart_config_t) {
+        .baudRate = UART_BAUDRATE,
+        .parity = UART_PARITY_ODD,
+        .stopBits = UART_STOP_1BIT,
+        .charSize = UART_CS_8BITS
+    });
+
+    print_init(
+        sendUartData,
+        uartDataAvailable,
+        readUartByte
+    );
+
     nunchuk_begin(NUNCHUK_ADDR);
 
-    /*
-       GEEN analogRead seed meer!
-       We gebruiken nu de vaste tabel in world.c zodat beide Arduino's gelijk zijn.
-    */
+
     world_set_seed(0); // Reset de tabel naar index 0
 
     init_system_timer();
     startAdc();
-    // initTone();
+    initTone();
     gfx_init();
     world_init();
 
     game_scene.tilemap = world_get_tilemap();
     game_scene.sprite_count = 0;
     gfx_set_scene(&game_scene);
-    init_scene();
 
     init_player();
     main_theme = register_sound(ZELDA);
@@ -91,7 +98,6 @@ void loop(void)
         }
     }
     gfx_frame();
-    _delay_ms(20);
 }
 
 int main(void)
