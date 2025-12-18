@@ -1,6 +1,6 @@
 /****************************************************************************************
 * File:         Nunchuk.c
-* Authors:       bRAM, Michiel Dirks
+* Authors:      bRAM, Michiel Dirks
 * Created on:   20-11-2025
 * Company:      Windesheim
 * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle

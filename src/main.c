@@ -20,6 +20,7 @@
 #include "../system.h"
 #include "game/player.h"
 #include "game/game_state.h"
+#include "resources.h"
 
 #define UART_BAUDRATE 9600
 
@@ -82,7 +83,7 @@ void start(void) {
 
     init_player();
 
-    main_theme = register_sound("tetris.sfd");
+    main_theme = register_sound(ZELDA);
     play_sound(&main_theme);
 
     start_game(RUNNER);
