@@ -94,7 +94,6 @@ void loop(void)
         if (state.z_button)
         {
             world_next_level();
-            _delay_ms(200);
         }
     }
     gfx_frame();

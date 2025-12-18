@@ -13,6 +13,8 @@
 #define TILE_TILE 2
 #define TILE_STONE 3
 
+uint8_t tile_flags[GFX_TILEMAP_WIDTH * GFX_TILEMAP_HEIGHT];
+
 /* World module API */
 void world_generate_new(void);
 void world_init(void);
@@ -20,7 +22,6 @@ gfx_tilemap_t *world_get_tilemap(void);
 
 /* Seed control for reproducible generation */
 void world_set_seed(uint32_t seed);
-uint32_t world_get_seed(void);
 
 /* Spawn & regenerate helpers */
 gfx_vec2_t world_get_spawn_tile(void);
