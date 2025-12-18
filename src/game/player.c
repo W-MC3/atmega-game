@@ -7,15 +7,14 @@
 ****************************************************************************************/
 
 #include <Arduino.h>
+#include <stdint.h>
 #include "player.h"
-#include "print.h"
-#include "hardware/uart/uart.h"
-#include "stdint.h"
 #include "delay.h"
 #include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
 #include "resources.h"
+#include "world_generation/world.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
 #define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime

@@ -12,7 +12,6 @@
 #include "player.h"
 #include "print.h"
 #include "gfx/gfx.h"
-#include "resources.h"
 
 enum Game_State {
     GAME_RUNNING,

@@ -1,5 +1,6 @@
 #include "world.h"
 #include "resources.h"
+#include "game/game_state.h"
 
 /* =========================================================
    CONFIGURATION
@@ -44,9 +45,6 @@ int get_fixed_random(int min, int max) {
 
 void world_set_seed(uint32_t seed) {
     rng_counter = 0;
-}
-uint32_t world_get_seed(void) {
-    return 0;
 }
 
 /* =========================================================
@@ -95,14 +93,22 @@ void world_generate_new(void) {
                 }
                 else
                 {
+                    // Clear tile flags
+                    tile_flags[y * GFX_TILEMAP_WIDTH + x] = 0;
+
                     /* Random obstakels */
                     int r = get_fixed_random(0, 100);
-                    if (r < WATER_CHANCE)
+                    if (r < WATER_CHANCE) {
                         tile = TILE_WATER;
-                    else if (r < STONE_CHANCE)
+                        tile_flags[y * GFX_TILEMAP_WIDTH + x] |= TILE_DEADLY_FLAG;
+                    }
+                    else if (r < STONE_CHANCE) {
                         tile = TILE_STONE;
-                    else
+                        tile_flags[y * GFX_TILEMAP_WIDTH + x] |= TILE_INACCESSIBLE_FLAG;
+                    }
+                    else {
                         tile = TILE_GRASS;
+                    }
                 }
             }
 
