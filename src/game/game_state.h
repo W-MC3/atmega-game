@@ -18,11 +18,17 @@ typedef enum {
     GAME_TYPE_COUNT // Last value to keep track of count
 } e_GAME_TYPE;
 
+
+
 uint8_t tile_flags[GFX_TILEMAP_WIDTH * GFX_TILEMAP_HEIGHT];
 
-void init_scene();
+void init_game_scene();
 
-void start_game(e_GAME_TYPE type);
+void game_start();
+
+void game_loop();
+
+void game_init();
 
 void game_over(uint16_t score);
 

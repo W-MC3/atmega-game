@@ -22,6 +22,9 @@
 #include "game/game_state.h"
 
 #define UART_BAUDRATE 9600
+#define BUTTON_BIT     PC1
+
+
 
 s_Sound main_theme;
 
@@ -46,6 +49,14 @@ void startAdc() {
     start_conversion();
 }
 
+void init_button(void)
+{
+    // A1 as input
+    DDRC &= ~(1 << BUTTON_BIT);
+
+    // Enable pull up on A1
+    PORTC |= (1 << BUTTON_BIT);
+}
 
 
 void start(void) {
@@ -73,25 +84,28 @@ void start(void) {
 
     startAdc();
 
-    initTone();
+    //sinitTone();
 
     // gfx init must be called before the sound code to initialize the SD card
     gfx_init();
 
-    init_scene();
+    init_button();
 
-    init_player();
 
-    //main_theme = register_sound("tetris.sfd");
+
+    main_theme = register_sound("zelda.sfd");
     //play_sound(&main_theme);
 
+    game_init();
 
-    start_game(RUNNER);
+
+
 }
 
-void loop(void) {
 
-    update_player();
+
+void loop(void) {
+    game_loop();
 
     gfx_frame();
 
