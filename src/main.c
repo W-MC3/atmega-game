@@ -20,7 +20,9 @@
 #include "game/player.h"
 #include "game/game_state.h"
 #include "net/proto.h"
+#include "resources.h"
 
+#define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 2400
 
 s_Sound main_theme;
@@ -55,14 +57,7 @@ void start(void)
         .charSize = UART_CS_8BITS
     });
 
-    print_init(
-        sendUartData,
-        uartDataAvailable,
-        readUartByte
-    );
-
     nunchuk_begin(NUNCHUK_ADDR);
-
 
     world_set_seed(0); // Reset de tabel naar index 0
 
@@ -80,16 +75,15 @@ void start(void)
     main_theme = register_sound(ZELDA);
     //play_sound(&main_theme);
 
-    DDRB |= (1 << DDB5);
-
     proto_init();
-    // start_game(RUNNER);
+    start_game(RUNNER);
 }
 
 void loop(void) {
-    // update_player();
-    // gfx_frame();
-    // setVolume(adc_value);
+    update_player();
+    setVolume(adc_value);
+
+    gfx_frame();
 
     while (uartDataAvailable()) {
         proto_recv_byte(readUartByte());
@@ -99,19 +93,24 @@ void loop(void) {
         proto_packet_t p = proto_get_packet();
 
         switch (p.opcode) {
-            case CMD_PING:
-                PORTB ^= (1 << PORTB5);
-                break;
+            case CMD_NEXT_SCENE:
+                world_next_level();
 
             default:
                 break;
         }
     }
 
-    _delay_ms(1000);
+    if (nunchuk_get_state(NUNCHUK_ADDR))
+    {
+        if (state.z_button)
+        {
+            uint8_t data[4] = { 0 };
+            proto_emit(CMD_NEXT_SCENE, data);
 
-    uint8_t data[4] = { 0 };
-    proto_emit(CMD_PING, data);
+            world_next_level();
+        }
+    }
 }
 
 int main(void)
