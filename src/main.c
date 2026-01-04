@@ -21,7 +21,7 @@
 #include "game/game_state.h"
 #include "net/proto.h"
 
-#define UART_BAUDRATE 9600
+#define UART_BAUDRATE 2400
 
 s_Sound main_theme;
 
