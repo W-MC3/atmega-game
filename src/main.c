@@ -12,6 +12,7 @@
 #include "hardware/i2c/twi.h"
 #include "hardware/ADC/ADC.h"
 #include "hardware/uart/uart.h"
+#include "hardware/Timers/timer_common.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "../lib/scheduler/delay.h"
 #include "sound/tone.h"
@@ -23,7 +24,7 @@
 #include "resources.h"
 
 #define NUNCHUK_ADDR 0x52
-#define UART_BAUDRATE 2400
+#define UART_BAUDRATE 24003
 
 s_Sound main_theme;
 volatile uint8_t adc_value = 0;
@@ -63,7 +64,7 @@ void start(void)
 
     init_system_timer();
     startAdc();
-    initTone();
+    // initTone();
     gfx_init();
     world_init();
 
@@ -72,45 +73,32 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    main_theme = register_sound(ZELDA);
-    play_sound(&main_theme);
+    // main_theme = register_sound(ZELDA);
+    // play_sound(&main_theme);
 
     proto_init();
-    start_game(RUNNER);
 }
 
 void loop(void) {
-    update_player();
     setVolume(adc_value);
-
-    gfx_frame();
 
     while (uartDataAvailable()) {
         proto_recv_byte(readUartByte());
     }
 
-    while (proto_has_packet()) {
-        proto_packet_t p = proto_get_packet();
+    if (get_game_state() == GAME_RUNNING) {
+        update_player();
 
-        switch (p.opcode) {
-            case CMD_NEXT_SCENE:
-                world_next_level();
-
-            default:
-                break;
-        }
+        timer_common_freeze();
+        gfx_frame();
+        timer_common_freeze();
     }
 
-    if (nunchuk_get_state(NUNCHUK_ADDR))
-    {
-        if (state.z_button)
-        {
-            uint8_t data[4] = { 0 };
-            proto_emit(CMD_NEXT_SCENE, data);
-
-            world_next_level();
-        }
+    while (uartDataAvailable()) {
+        proto_recv_byte(readUartByte());
     }
+
+    game_update();
 }
 
 int main(void)

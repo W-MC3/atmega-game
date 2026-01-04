@@ -12,13 +12,11 @@
 #include "player.h"
 #include "print.h"
 #include "gfx/gfx.h"
+#include "net/proto.h"
+#include "world_generation/world.h"
+#include "nunchuk.h"
 
-enum Game_State {
-    GAME_RUNNING,
-    GAME_OVER,
-};
-
-enum Game_State game_state = GAME_OVER;
+enum Game_State game_state = GAME_IDLE;
 
 void save_high_score(uint16_t score) {
     // TODO: Check highscore and compare it with the current score
@@ -42,9 +40,58 @@ void start_game(e_GAME_TYPE type) {
 void game_over(uint16_t score) {
     game_state = GAME_OVER;
     save_high_score(score);
-    gfx_frame();
-    while (true) {}
 }
+
+void game_update() {
+    while (proto_has_packet()) {
+        proto_packet_t p = proto_get_packet();
+
+        switch (p.opcode) {
+            case CMD_NEXT_SCENE:
+                world_next_level();
+                break;
+
+            case CMD_START:
+                start_game(RUNNER);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    switch (game_state) {
+        case GAME_IDLE:
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
+                uint8_t data[4] = { 0 };
+                proto_emit(CMD_START, data);
+
+                start_game(DEATH);
+            }
+
+            break;
+
+        case GAME_RUNNING:
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
+                uint8_t data[4] = { 0 };
+                proto_emit(CMD_NEXT_SCENE, data);
+
+                world_next_level();
+            }
+
+            update_player();
+
+            break;
+
+        default:
+            break;
+    }
+}
+
+enum Game_State get_game_state() {
+    return game_state;
+}
+
 /*
 void update_game_state() {
     if (digitalRead(GAME_START_BUTTON_PIN)) {
