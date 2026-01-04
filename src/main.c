@@ -73,7 +73,7 @@ void start(void)
 
     init_player();
     main_theme = register_sound(ZELDA);
-    //play_sound(&main_theme);
+    play_sound(&main_theme);
 
     proto_init();
     start_game(RUNNER);

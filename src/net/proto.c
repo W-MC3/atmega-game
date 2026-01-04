@@ -13,6 +13,7 @@
 static uint8_t recv_buffer[PROTO_PACKET_SIZE];
 static uint8_t recv_index;
 static bool packet_ready;
+static bool packet_recv_start;
 static proto_packet_t current_packet;
 
 void proto_init() {
@@ -24,6 +25,14 @@ void proto_init() {
 
 void proto_recv_byte(unsigned char byte) {
     if (packet_ready) {
+        return;
+    }
+
+    if (!packet_recv_start) {
+        if (byte == 0xFF) {
+            packet_recv_start = true;
+        }
+
         return;
     }
 
@@ -39,6 +48,7 @@ void proto_recv_byte(unsigned char byte) {
         }
 
         packet_ready = true;
+        packet_recv_start = false;
         recv_index = 0;
     }
 }
@@ -60,11 +70,11 @@ void proto_emit(uint8_t op, uint8_t data[PROTO_PACKET_MAX_DATA_SIZE]) {
         crc ^= data[i];
     }
 
-    uint8_t buf[PROTO_PACKET_SIZE] = { op, packet_id++, crc };
-    memcpy(&buf[3], data, PROTO_PACKET_MAX_DATA_SIZE); // copies in the remaining data
+    uint8_t buf[PROTO_PACKET_SIZE + 1] = { 0xFF, op, packet_id++, crc }; // 0xFF = start bit
+    memcpy(&buf[4], data, PROTO_PACKET_MAX_DATA_SIZE); // copies in the remaining data
 
     while (!txAvailable()) {} // perhaps we should use a callback or interrupt?
-    sendUartData(buf, PROTO_PACKET_SIZE);
+    sendUartData(buf, PROTO_PACKET_SIZE + 1);
 }
 
 uint32_t proto_get_uint32(proto_packet_t* packet, uint8_t idx) {
