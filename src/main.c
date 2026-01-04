@@ -12,7 +12,6 @@
 #include "hardware/i2c/twi.h"
 #include "hardware/ADC/ADC.h"
 #include "hardware/uart/uart.h"
-#include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "../lib/scheduler/delay.h"
 #include "sound/tone.h"
@@ -20,10 +19,9 @@
 #include "world_generation/world.h"
 #include "game/player.h"
 #include "game/game_state.h"
-#include "resources.h"
+#include "net/proto.h"
 
-#define NUNCHUK_ADDR 0x52
-#define UART_BAUDRATE 9600
+#define UART_BAUDRATE 2400
 
 s_Sound main_theme;
 volatile uint8_t adc_value = 0;
@@ -82,21 +80,38 @@ void start(void)
     main_theme = register_sound(ZELDA);
     //play_sound(&main_theme);
 
-    start_game(RUNNER);
+    DDRB |= (1 << DDB5);
+
+    proto_init();
+    // start_game(RUNNER);
 }
 
-void loop(void)
-{
-    update_player();
-    setVolume(adc_value);
-    if (nunchuk_get_state(NUNCHUK_ADDR))
-    {
-        if (state.z_button)
-        {
-            world_next_level();
+void loop(void) {
+    // update_player();
+    // gfx_frame();
+    // setVolume(adc_value);
+
+    while (uartDataAvailable()) {
+        proto_recv_byte(readUartByte());
+    }
+
+    while (proto_has_packet()) {
+        proto_packet_t p = proto_get_packet();
+
+        switch (p.opcode) {
+            case CMD_PING:
+                PORTB ^= (1 << PORTB5);
+                break;
+
+            default:
+                break;
         }
     }
-    gfx_frame();
+
+    _delay_ms(1000);
+
+    uint8_t data[4] = { 0 };
+    proto_emit(CMD_PING, data);
 }
 
 int main(void)
