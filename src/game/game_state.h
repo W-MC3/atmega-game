@@ -32,6 +32,4 @@ void game_over(uint16_t score);
 
 enum Game_State get_game_state();
 
-void game_update();
-
 #endif //ATMEGA_GAME_GAME_STATE_H

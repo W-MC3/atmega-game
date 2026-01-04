@@ -22,13 +22,24 @@
 #include "game/game_state.h"
 #include "net/proto.h"
 #include "resources.h"
+#include "game/npc.h"
 
 #define NUNCHUK_ADDR 0x52
-#define UART_BAUDRATE 24003
+#define UART_BAUDRATE 2400
 
 s_Sound main_theme;
 volatile uint8_t adc_value = 0;
 static gfx_scene_t game_scene;
+static game_npc_t player_npc = {
+    .tex_north = { .filename = PLAYER_BOTTOM_RIGHT },
+    .tex_east = { .filename = PLAYER_TOP_RIGHT },
+    .tex_south = { .filename = PLAYER_TOP_RIGHT },
+    .tex_west = { .filename = PLAYER_BOTTOM_LEFT },
+    .sprite = {
+        .position = { 0, 0 },
+        .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
+    }
+};
 
 void adcCallback(const uint16_t result) { adc_value = result >> 8; }
 
@@ -79,6 +90,70 @@ void start(void)
     proto_init();
 }
 
+void game_init() {
+    init_npc(&player_npc);
+
+    if (player_get_role() == DEATH) {
+        gfx_add_sprite(&(player_npc.sprite));
+    }
+}
+
+void game_update() {
+    while (proto_has_packet()) {
+        proto_packet_t p = proto_get_packet();
+
+        switch (p.opcode) {
+            case CMD_NEXT_SCENE: {
+                world_next_level();
+                break;
+            }
+
+            case CMD_START: {
+                start_game(RUNNER);
+                game_init();
+                break;
+            }
+
+            case CMD_MOVE: {
+                gfx_vec2_t player_screen_pos = gfx_world_to_screen((gfx_vec2_t){ (int16_t)(p.data[1]), (int16_t)(p.data[2]) });
+                move_npc(&player_npc, p.data[0], player_screen_pos.x, player_screen_pos.y);
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    switch (get_game_state()) {
+        case GAME_IDLE:
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
+                uint8_t data[4] = { 0 };
+                proto_emit(CMD_START, data);
+
+                start_game(DEATH);
+                game_init();
+            }
+
+            break;
+
+        case GAME_RUNNING:
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
+                uint8_t data[4] = { 0 };
+                proto_emit(CMD_NEXT_SCENE, data);
+
+                world_next_level();
+            }
+
+            update_player();
+
+            break;
+
+        default:
+            break;
+    }
+}
+
 void loop(void) {
     setVolume(adc_value);
 
@@ -89,13 +164,9 @@ void loop(void) {
     if (get_game_state() == GAME_RUNNING) {
         update_player();
 
-        timer_common_freeze();
+        // timer_common_freeze();
         gfx_frame();
-        timer_common_freeze();
-    }
-
-    while (uartDataAvailable()) {
-        proto_recv_byte(readUartByte());
+        // timer_common_freeze();
     }
 
     game_update();

@@ -20,3 +20,4 @@ void timer_common_resume() {
     TIMSK1 = timsk1_old;
     TIMSK2 = timsk2_old;
 }
+

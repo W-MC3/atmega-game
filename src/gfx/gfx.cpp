@@ -361,6 +361,10 @@ void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind) {
 }
 
 void gfx_invalidate_sprite(gfx_sprite_t *sprite) {
+    if ((sprite->flags & GFX_DIRTY_BIT) != 0) {
+        return;
+    }
+
     sprite->flags |= GFX_DIRTY_BIT;
     gfx_push_dirty_rect(
         sprite->position.x - (sprite->size.x / 2),
