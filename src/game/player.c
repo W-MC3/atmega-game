@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "player.h"
 #include "delay.h"
+#include "../lib/PCF8574/PCF8574.h"
 #include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
