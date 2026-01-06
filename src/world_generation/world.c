@@ -16,7 +16,7 @@
    ========================================================= */
 static gfx_bitmap_t bmp_grass = {GRASS_TILE};
 static gfx_bitmap_t bmp_water = {WATER_TILE};
-static gfx_bitmap_t bmp_tile = {CHECKERBOARD_TILE};
+static gfx_bitmap_t bmp_tile = {SPIKE_CLOSED};
 static gfx_bitmap_t bmp_rock = {STONE_TILE};
 
 static gfx_tilemap_t world_map = {

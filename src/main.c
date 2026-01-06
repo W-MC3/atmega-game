@@ -32,7 +32,7 @@ volatile uint8_t adc_value = 0;
 static gfx_scene_t game_scene;
 static game_npc_t player_npc = {
     .tex_north = { .filename = PLAYER_BOTTOM_RIGHT },
-    .tex_east = { .filename = PLAYER_TOP_RIGHT },
+    .tex_east = { .filename = PLAYER_TOP_LEFT  },
     .tex_south = { .filename = PLAYER_TOP_RIGHT },
     .tex_west = { .filename = PLAYER_BOTTOM_LEFT },
     .sprite = {
@@ -75,7 +75,7 @@ void start(void)
 
     init_system_timer();
     startAdc();
-    // initTone();
+    initTone();
     gfx_init();
     world_init();
 
@@ -84,8 +84,8 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    // main_theme = register_sound(ZELDA);
-    // play_sound(&main_theme);
+    main_theme = register_sound(TETRIS);
+    play_sound(&main_theme);
 
     proto_init();
 }
@@ -164,9 +164,9 @@ void loop(void) {
     if (get_game_state() == GAME_RUNNING) {
         update_player();
 
-        // timer_common_freeze();
+        cli();
         gfx_frame();
-        // timer_common_freeze();
+        sei();
     }
 
     game_update();

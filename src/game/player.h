@@ -26,7 +26,9 @@ void update_player();
 
 void player_start_game(e_GAME_TYPE role);
 
-gfx_vec2_t player_get_position();
+gfx_vec2_t player_get_world_position();
+
+gfx_vec2_t player_get_screen_position();
 
 e_GAME_TYPE player_get_role();
 

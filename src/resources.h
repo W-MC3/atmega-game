@@ -20,6 +20,9 @@
 #define CHECKERBOARD_TILE "D"
 #define SELECTOR "E"
 
+#define SPIKE_CLOSED "F"
+#define SPIKE_OPEN "G"
+
 #define ZELDA "Y"
 #define TETRIS "Z"
 

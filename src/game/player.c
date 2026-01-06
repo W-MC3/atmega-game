@@ -159,7 +159,7 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     }
 
     uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
-    if ((tile_flags[tilemap_index] & TILE_INACCESSIBLE_FLAG) > 0) {
+    if ((tile_flags[tilemap_index] & TILE_INACCESSIBLE_FLAG) > 0 && current_game_type == RUNNER) {
         playerPosition = last_position;
     }
 
@@ -211,6 +211,10 @@ void update_player() {
     update_game_state();
 }
 
-gfx_vec2_t player_get_position() {
+gfx_vec2_t player_get_screen_position() {
     return gfx_world_to_screen(playerPosition);
+}
+
+gfx_vec2_t player_get_world_position() {
+    return playerPosition;
 }
