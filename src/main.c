@@ -7,7 +7,6 @@
 ****************************************************************************************/
 
 #include <Arduino.h>
-#include <util/delay.h>
 #include <gfx/gfx.h>
 #include "hardware/i2c/twi.h"
 #include "hardware/ADC/ADC.h"
@@ -15,6 +14,7 @@
 #include "../lib/print/print.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "../lib/scheduler/delay.h"
+#include "../lib/PCF8574/PCF8574.h"
 #include "sound/tone.h"
 #include "sound/sound.h"
 #include "world_generation/world.h"
@@ -23,6 +23,7 @@
 #include "resources.h"
 
 #define NUNCHUK_ADDR 0x52
+#define PCF8574_ADDR 0x21
 #define UART_BAUDRATE 9600
 
 s_Sound main_theme;
@@ -50,6 +51,7 @@ void start(void)
 {
     init();
     TWI_Init();
+    pcf8574Init(PCF8574_ADDR);
     initUart((uart_config_t) {
         .baudRate = UART_BAUDRATE,
         .parity = UART_PARITY_ODD,
