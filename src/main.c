@@ -138,11 +138,13 @@ void game_update() {
             break;
 
         case GAME_RUNNING:
-            if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
-                uint8_t data[4] = { 0 };
-                proto_emit(CMD_NEXT_SCENE, data);
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button && player_get_role() == DEATH) {
+                gfx_vec2_t selected_pos = player_get_world_position();
 
-                world_next_level();
+                // uint8_t data[4] = { 0 };
+                // proto_emit(CMD_NEXT_SCENE, data);
+                //
+                // world_next_level();
             }
 
             update_player();

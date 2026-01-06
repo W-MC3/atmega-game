@@ -366,11 +366,29 @@ void gfx_invalidate_sprite(gfx_sprite_t *sprite) {
     }
 
     sprite->flags |= GFX_DIRTY_BIT;
-    gfx_push_dirty_rect(
-        sprite->position.x - (sprite->size.x / 2),
-        sprite->position.y,
-        sprite->size.x,
-        sprite->size.y);
+
+    const int16_t x0 = sprite->position.x - (sprite->size.x / 2);
+    const int16_t y0 = sprite->position.y;
+    const int16_t x1 = x0 + sprite->size.x;
+    const int16_t y1 = y0 + sprite->size.y;
+
+    gfx_push_dirty_rect(x0, y0, sprite->size.x, sprite->size.y);
+
+    for (uint8_t i = 0; i < active_scene->sprite_count; i++) {
+        gfx_sprite_t *other = active_scene->sprites[i];
+
+        if (other == sprite) continue;
+        if ((other->flags & GFX_DIRTY_BIT) != 0) continue;
+
+        const int16_t ox0 = other->position.x - (other->size.x / 2);
+        const int16_t oy0 = other->position.y;
+        const int16_t ox1 = ox0 + other->size.x;
+        const int16_t oy1 = oy0 + other->size.y;
+
+        if (x0 < ox1 && x1 > ox0 && y0 < oy1 && y1 > oy0) {
+            gfx_invalidate_sprite(other);
+        }
+    }
 }
 
 gfx_vec2_t gfx_world_to_screen(const gfx_vec2_t vec) {
