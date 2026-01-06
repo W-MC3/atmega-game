@@ -20,7 +20,7 @@
 #define CMD_HEALTH        0x05 // Health update (1x uint8_t)
 #define CMD_READY         0x06 // Ready status (1x uint8_t)
 #define CMD_START         0x07 // Start game (no data)
-#define CMD_ACTIVATE_TRAP 0x08 // Activate trap (1x uint8_t)
+#define CMD_ACTIVATE_TRAP 0x08 // Activate trap (2x uint8_t)
 #define CMD_NEXT_SCENE    0x09 // Move to next scene (no data)
 
 typedef struct proto_packet {

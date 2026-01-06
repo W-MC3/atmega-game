@@ -98,6 +98,18 @@ void game_init() {
     }
 }
 
+uint16_t world_pos_to_idx(gfx_vec2_t world_pos) {
+    return world_pos.x + world_pos.y * GFX_TILEMAP_TILE_WIDTH;
+}
+
+gfx_vec2_t idx_to_world_pos(uint16_t idx) {
+    return (gfx_vec2_t){ .x = idx % GFX_TILEMAP_TILE_WIDTH, .y = (int16_t)(idx / GFX_TILEMAP_TILE_WIDTH) };
+}
+
+void activate_trap(gfx_vec2_t world_pos) {
+    return; // TODO: impl
+}
+
 void game_update() {
     while (proto_has_packet()) {
         proto_packet_t p = proto_get_packet();
@@ -117,6 +129,13 @@ void game_update() {
             case CMD_MOVE: {
                 gfx_vec2_t player_screen_pos = gfx_world_to_screen((gfx_vec2_t){ (int16_t)(p.data[1]), (int16_t)(p.data[2]) });
                 move_npc(&player_npc, p.data[0], player_screen_pos.x, player_screen_pos.y);
+                break;
+            }
+
+            case CMD_ACTIVATE_TRAP: {
+                gfx_vec2_t trap_world_pos = { (int16_t)(p.data[0]), (int16_t)(p.data[1]) };
+                activate_trap(trap_world_pos);
+
                 break;
             }
 
@@ -141,10 +160,10 @@ void game_update() {
             if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button && player_get_role() == DEATH) {
                 gfx_vec2_t selected_pos = player_get_world_position();
 
-                // uint8_t data[4] = { 0 };
-                // proto_emit(CMD_NEXT_SCENE, data);
-                //
-                // world_next_level();
+                uint8_t data[4] = { (uint8_t)selected_pos.x, (uint8_t)selected_pos.y, 0, 0 };
+                proto_emit(CMD_ACTIVATE_TRAP, data);
+
+                activate_trap(selected_pos);
             }
 
             update_player();
