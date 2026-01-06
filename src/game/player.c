@@ -10,10 +10,12 @@
 #include <stdint.h>
 #include "player.h"
 #include "delay.h"
+#include "../lib/PCF8574/PCF8574.h"
 #include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
 #include "resources.h"
+#include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
 #include "net/proto.h"
 
@@ -197,6 +199,8 @@ void update_game_state() {
 void update_player() {
 
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
+        playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time);
+        update_7_display(playtime_left_ms / 1000);
         if (nunchuk_get_state(NUNCHUK_ADDR)) {
             last_hop_time = scheduler_millis();
 
