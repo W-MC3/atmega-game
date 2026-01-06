@@ -1,18 +1,18 @@
 /****************************************************************************************
-* File:         PCF8574.h
+* File:         display7seg.c
  * Authors:     Michiel Dirks
 * Created on:   06-01-2025
 * Company:      Windesheim
 * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
 ****************************************************************************************/
 
-#ifndef ATMEGA_GAME_PCF8574_H
-#define ATMEGA_GAME_PCF8574_H
+#include "display7seg.h"
+#include "../PCF8574/PCF8574.h"
 
-#include <stdint.h>
+uint8_t numToPins[] = {
+ ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE
+};
 
-void pcf8574Init(uint8_t address);
-
-void pcf8574Write(uint8_t port_val);
-
-#endif //ATMEGA_GAME_PCF8574_H
+void update7Display(const uint8_t num) {
+ pcf8574Write(numToPins[num]);
+}

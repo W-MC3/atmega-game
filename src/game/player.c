@@ -15,6 +15,7 @@
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
 #include "resources.h"
+#include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
@@ -198,6 +199,8 @@ void update_game_state() {
 void update_player() {
 
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
+        playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time);
+        update7Display(playtime_left_ms / 1000);
         if (nunchuk_get_state(NUNCHUK_ADDR)) {
             last_hop_time = scheduler_millis();
 

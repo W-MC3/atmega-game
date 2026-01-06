@@ -1,6 +1,6 @@
 /****************************************************************************************
 * File:         PCF8574.c
- * Authors:       Michiel Dirks
+ * Authors:    Michiel Dirks
 * Created on:   06-01-2025
 * Company:      Windesheim
 * Website:      https://www.windesheim.nl/opleidingen/voltijd/bachelor/ict-zwolle
