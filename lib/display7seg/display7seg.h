@@ -42,6 +42,6 @@
 #define EIGHT (SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G)
 #define NINE (SEG_A | SEG_B | SEG_C | SEG_D | SEG_F | SEG_G)
 
-void update7Display(const uint8_t num);
+void update_7_display(const uint8_t num);
 
 #endif //ATMEGA_GAME_DISPLAY7SEG_H

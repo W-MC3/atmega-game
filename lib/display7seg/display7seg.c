@@ -13,6 +13,6 @@ uint8_t numToPins[] = {
  ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE
 };
 
-void update7Display(const uint8_t num) {
- pcf8574Write(numToPins[num]);
+void update_7_display(const uint8_t num) {
+ pcf8574_write(numToPins[num]);
 }

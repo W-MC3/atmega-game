@@ -51,7 +51,7 @@ void start(void)
 {
     init();
     TWI_Init();
-    pcf8574Init(PCF8574_ADDR);
+    pcf8574_init(PCF8574_ADDR);
     initUart((uart_config_t) {
         .baudRate = UART_BAUDRATE,
         .parity = UART_PARITY_ODD,

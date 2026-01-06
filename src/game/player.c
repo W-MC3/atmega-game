@@ -200,7 +200,7 @@ void update_player() {
 
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
         playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time);
-        update7Display(playtime_left_ms / 1000);
+        update_7_display(playtime_left_ms / 1000);
         if (nunchuk_get_state(NUNCHUK_ADDR)) {
             last_hop_time = scheduler_millis();
 

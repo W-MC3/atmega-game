@@ -11,8 +11,8 @@
 
 #include <stdint.h>
 
-void pcf8574Init(uint8_t address);
+void pcf8574_init(uint8_t address);
 
-void pcf8574Write(uint8_t port_val);
+void pcf8574_write(uint8_t port_val);
 
 #endif //ATMEGA_GAME_PCF8574_H

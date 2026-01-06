@@ -12,11 +12,11 @@
 uint8_t device_address;
 uint8_t written_val;
 
-void pcf8574Init(uint8_t address) {
+void pcf8574_init(uint8_t address) {
  device_address = address;
 }
 
-void pcf8574Write(uint8_t port_val) {
+void pcf8574_write(uint8_t port_val) {
  if (port_val == written_val) {
   return;
  }
