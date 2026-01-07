@@ -18,6 +18,7 @@
 #include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
 #include "net/proto.h"
+#include "sound/sound.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
 #define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime
@@ -30,6 +31,8 @@ uint16_t score;
 uint16_t current_y = 0;
 
 gfx_vec2_t playerPosition;
+
+s_Sound hop_sound;
 
 
 // GFX //
@@ -97,6 +100,8 @@ void init_player() {
     gfx_init_bitmap(&tile_selector);
 
     gfx_add_sprite(&player);
+
+    hop_sound = register_sound(HOP);
 }
 
 void player_start_game(e_GAME_TYPE role) {
@@ -180,6 +185,9 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
     uint8_t data[4] = { dir, (uint8_t)(playerPosition.x), (uint8_t)(playerPosition.y), 0 };
     proto_emit(CMD_MOVE, data);
+
+    reset_sound(&hop_sound);
+    play_sound(&hop_sound);
 }
 
 
@@ -210,7 +218,6 @@ void update_player() {
             move_player(joyX, joyY);
         }
     }
-
 
     update_game_state();
 }

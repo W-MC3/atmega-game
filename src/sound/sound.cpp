@@ -8,8 +8,10 @@
 
 #include "sound.h"
 #include "tone.h"
-#include "delay.h"
 #include <SdFat_Adafruit_Fork.h>
+#include <avr/interrupt.h>
+
+#include "hardware/uart/uart.h"
 
 extern SdFat32 SD;
 
@@ -23,11 +25,14 @@ static bool load_note_chunk(s_SoundReader *reader) {
     reader->buffer_index = 0;
     reader->buffer_count = 0;
 
+    cli();
     if (fileReader.isBusy()) {
+        sei();
         return false;
     }
 
     if (!fileReader.open(reader->filename, O_RDONLY)) {
+        sei();
         return false;
     }
 
@@ -51,16 +56,32 @@ static bool load_note_chunk(s_SoundReader *reader) {
 
     reader->file_reader_pos = fileReader.curPosition();
     fileReader.close();
-
+    sei();
     return reader->buffer_count > 0;
 }
 
+extern char __heap_start;
+extern char *__brkval;
+
+int freeRam(void)
+{
+    char top;
+    return &top - (__brkval == 0 ? &__heap_start : __brkval);
+}
+
 s_Sound register_sound(const char *filename) {
+    if (txAvailable()) {
+        int free = freeRam();
+        char msg[16];
+        snprintf(msg, sizeof(msg), "1:RAM: %d\n", free);
+        sendUartData(msg, strlen(msg));
+    }
+
+    while (!txAvailable()) {}
+
     s_Sound sound;
     sound.frequency_offset = 0;
     sound.looping = false;
-    sound.playing_index = 0;
-    sound.playing_start_time = 0;
 
     sound.reader.filename = filename;
     sound.reader.file_reader_pos = 0;
@@ -68,7 +89,16 @@ s_Sound register_sound(const char *filename) {
     sound.reader.reader_note_index = 0;
     sound.reader.buffer_count = 0;
     sound.reader.buffer_index = 0;
+    sound.reader.needs_loading = false;
 
+    if (txAvailable()) {
+        int free = freeRam();
+        char msg[16];
+        snprintf(msg, sizeof(msg), "2:RAM: %d\n", free);
+        sendUartData(msg, strlen(msg));
+    }
+
+    while (!txAvailable()) {}
 
     // Open file
     if (!SD.exists(filename)) {
@@ -78,6 +108,14 @@ s_Sound register_sound(const char *filename) {
     if (!fileReader.open(filename, O_RDONLY)) {
         return sound;
     }
+
+    if (txAvailable()) {
+        char msg[16];
+        snprintf(msg, sizeof(msg), "3:RAM: %d\n", freeRam());
+        sendUartData(msg, strlen(msg));
+    }
+
+    while (!txAvailable()) {}
 
     // Read magic number
     char magic[SFD_MAGIC_LEN];
@@ -110,6 +148,13 @@ s_Sound register_sound(const char *filename) {
     // Preload first chunk
     load_note_chunk(&sound.reader);
 
+    if (txAvailable()) {
+        int free = freeRam();
+        char msg[16];
+        snprintf(msg, sizeof(msg), "4:RAM: %d\n", free);
+        sendUartData(msg, strlen(msg));
+    }
+
     return sound;
 }
 
@@ -126,11 +171,9 @@ void reset_sound(s_Sound *sound_ref) {
     reader->reader_note_index = 0;
     reader->buffer_index = 0;
     reader->buffer_count = 0;
+    reader->needs_loading = false;
 
     load_note_chunk(reader);
-
-    sound_ref->playing_index = 0;
-    sound_ref->playing_start_time = scheduler_millis();
 }
 
 // sets frequency offset
@@ -150,18 +193,21 @@ void play_sound(s_Sound *sound_ref) {
 
     // No notes available
     if (reader->buffer_count == 0) {
+        reader->needs_loading = true;
         return;
     }
 
-    // Current note
-    s_Note *note = &reader->note_buffer[reader->buffer_index];
-
-    sound_ref->playing_start_time = scheduler_millis();
-    uint16_t freq = note->frequency + sound_ref->frequency_offset;
-    playTone(freq, note->duration, update_sound_playback, sound_ref);
+    // Kickoff sound playback
+    playTone(0, 1, update_sound_playback, sound_ref);
 }
 
 static void update_sound_playback(void *arg) {
+    if (txAvailable()) {
+        int free = freeRam();
+        char msg[16];
+        snprintf(msg, sizeof(msg), "RAM: %d\n", free);
+        sendUartData(msg, strlen(msg));
+    }
     s_Sound *sound_ref = static_cast<s_Sound *>(arg);
 
     if (sound_ref == nullptr) {
@@ -170,38 +216,42 @@ static void update_sound_playback(void *arg) {
 
     s_SoundReader *reader = &sound_ref->reader;
 
-    uint32_t now = scheduler_millis();
-
-    reader->buffer_index++;
-    sound_ref->playing_index++;
-    sound_ref->playing_start_time = now;
-
     // Need next chunk?
     if (reader->buffer_index >= reader->buffer_count) {
-        if (!load_note_chunk(reader)) {
-            // Distinguish between true end-of-song and SD still being busy.
-            if (reader->reader_note_index >= reader->note_count) {
-                // End of song
-                reset_sound(sound_ref);
-                if (!sound_ref->looping) {
-                    playTone(0, 1, nullptr, nullptr);
-                    return;
-                }
-            } else {
-                // SD is busy; schedule a very short silent tone to retry loading
-                playTone(0, 1, update_sound_playback, sound_ref);
-                return;
-            }
+        if (reader->reader_note_index >= reader->note_count && !sound_ref->looping) {
+            playTone(0, 0, nullptr, nullptr);
+            return;
         }
-    }
-
-    // After possible reload, ensure index within current buffer
-    if (reader->buffer_index >= reader->buffer_count) {
-        return;
+        reader->needs_loading = true;
+        // Play the same note as long as new notes have not been loaded instead of overflowing
+        reader->buffer_index = reader->buffer_count;
     }
 
     s_Note *note = &reader->note_buffer[reader->buffer_index];
+    reader->buffer_index++;
 
     uint16_t freq = note->frequency + sound_ref->frequency_offset;
     playTone(freq, note->duration, update_sound_playback, sound_ref);
+}
+
+// Poll function to check if sound needs chunk reloading (call from main loop)
+void update_sound_chunks(s_Sound *sound_ref) {
+    s_SoundReader *reader = &sound_ref->reader;
+
+    if (reader->needs_loading) {
+        if (!load_note_chunk(reader)) {
+            // Distinguish between read fault or end of song
+            if (reader->reader_note_index >= reader->note_count) {
+                // End of song
+                reset_sound(sound_ref);
+                if (sound_ref->looping) {
+                    // trigger new sound update
+                    playTone(0, 1, update_sound_playback, sound_ref);
+                }
+            }
+        }
+        else {
+            reader->needs_loading = false;
+        }
+    }
 }
