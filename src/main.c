@@ -112,7 +112,7 @@ void activate_trap(gfx_vec2_t world_pos) {
     return; // TODO: impl
 }
 
-void game_update() {
+void game_update_net() {
     while (proto_has_packet()) {
         proto_packet_t p = proto_get_packet();
 
@@ -145,6 +145,10 @@ void game_update() {
                 break;
         }
     }
+}
+
+void game_update() {
+    game_update_net();
 
     switch (get_game_state()) {
         case GAME_IDLE:
