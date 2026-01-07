@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include "game_state.h"
 #include "player.h"
-#include "print.h"
 #include "gfx/gfx.h"
 #include "net/proto.h"
 #include "world_generation/world.h"

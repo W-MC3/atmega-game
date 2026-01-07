@@ -156,6 +156,11 @@ void play_sound(s_Sound *sound_ref) {
     playTone(0, 1, update_sound_playback, sound_ref);
 }
 
+void stop_sound_playback(void) {
+    // Play tone of 0 hz and remove sound callbacks
+    playTone(0, 1, nullptr, nullptr);
+}
+
 static void update_sound_playback(void *arg) {
     s_Sound *sound_ref = static_cast<s_Sound *>(arg);
 

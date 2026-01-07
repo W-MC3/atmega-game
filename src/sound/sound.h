@@ -67,6 +67,8 @@ SOUND_EXTERN_C void reset_sound(s_Sound *sound_ref);
 
 SOUND_EXTERN_C void play_sound(s_Sound *sound_ref);
 
+SOUND_EXTERN_C void stop_sound_playback(void);
+
 SOUND_EXTERN_C void set_frequency_offset(s_Sound *sound_ref);
 
 SOUND_EXTERN_C void update_sound_chunks(s_Sound *sound_ref);
