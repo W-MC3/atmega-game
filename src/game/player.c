@@ -127,6 +127,7 @@ void add_score() {
 
 void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 {
+    print_ram();
     int x = (int)x_stick_val - 128;
     int y = (int)y_stick_val - 128;
 
@@ -204,7 +205,6 @@ void update_game_state() {
 }
 
 void update_player() {
-    print_ram();
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
         playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time);
         update_7_display(playtime_left_ms / 1000);

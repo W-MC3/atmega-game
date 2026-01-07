@@ -16,10 +16,8 @@ int freeRam(void)
 }
 
 void print_ram(void) {
-    if (txAvailable()) {
-        int free = freeRam();
-        char msg[16];
-        snprintf(msg, sizeof(msg), "1:RAM: %d\n", free);
-        sendUartData(msg, strlen(msg));
-    }
+    int free = freeRam();
+    char msg[16];
+    snprintf(msg, sizeof(msg), "RAM: %d\n", free);
+    sendUartData(msg, strlen(msg));
 }

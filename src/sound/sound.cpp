@@ -62,9 +62,6 @@ static bool load_note_chunk(s_SoundReader *reader) {
 
 s_Sound register_sound(const char *filename) {
 
-
-    while (!txAvailable()) {}
-
     s_Sound sound;
     sound.frequency_offset = 0;
     sound.looping = false;
@@ -77,8 +74,6 @@ s_Sound register_sound(const char *filename) {
     sound.reader.buffer_index = 0;
     sound.reader.needs_loading = false;
 
-    while (!txAvailable()) {}
-
     // Open file
     if (!SD.exists(filename)) {
         return sound;
@@ -87,8 +82,6 @@ s_Sound register_sound(const char *filename) {
     if (!fileReader.open(filename, O_RDONLY)) {
         return sound;
     }
-
-    while (!txAvailable()) {}
 
     // Read magic number
     char magic[SFD_MAGIC_LEN];
