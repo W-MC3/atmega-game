@@ -12,6 +12,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define NUNCHUK_ADDR 0x52
+
 // don't encode
 #define ENCODED         0
 #define IDLEN		4 // bytes

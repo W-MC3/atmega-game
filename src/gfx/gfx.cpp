@@ -21,7 +21,6 @@ SdFat32 SD;
 Adafruit_ILI9341 tft = Adafruit_ILI9341(ILI9341_CS_PIN, ILI9341_DC_PIN);
 
 void gfx_init() {
-    cli();
     if(!SD.begin(SDCARD_CS_PIN, SD_SCK_MHZ(25))) {
         for(;;);
     }
@@ -30,7 +29,6 @@ void gfx_init() {
 
     _delay_ms(200);
     gfx_reset();
-    sei();
 }
 
 /*
@@ -48,10 +46,8 @@ Please note that we always assume the format to be BGR24, which is the native fo
 The relevant ffmpeg command for conversion is: ``ffmpeg -i INPUT.PNG -pix_fmt bgr24 OUTPUT.BMP``
 */
 int gfx_init_bitmap(gfx_bitmap_t* bitmap) {
-    cli();
     File32 f = SD.open(bitmap->filename);
     if (!f) {
-        sei();
         return SD.sdErrorCode();
     }
 
@@ -61,7 +57,6 @@ int gfx_init_bitmap(gfx_bitmap_t* bitmap) {
     int32_t width = *(int32_t *)(h + 18);
     bitmap->row_size = ((width * 3) + 3) & ~3;
     f.close();
-    sei();
     return 0;
 }
 
@@ -73,9 +68,7 @@ void gfx_frame() {
 
     // whole tilemap is dirty, redraw everything
     if ((active_scene->tilemap->flags & GFX_DIRTY_BIT) != 0) {
-        cli();
         tft.fillScreen(GFX_CONFIG_BACKGROUND_COLOUR);
-        sei();
 
         // iterate over all tiles and draw them, clip is set to GFX_FULLSCREEN
         for (int16_t tx = 0; tx < GFX_TILEMAP_WIDTH; tx++) {
@@ -142,11 +135,9 @@ void gfx_frame() {
 }
 
 void gfx_reset() {
-    cli();
     active_scene = NULL;
     dirty_rects_count = 0;
     tft.fillScreen(GFX_CONFIG_BACKGROUND_COLOUR);
-    sei();
 }
 
 bool gfx_add_sprite(gfx_sprite_t *sprite) {
@@ -191,10 +182,8 @@ void gfx_set_bitmap_sprite(gfx_sprite_t* sprite, gfx_bitmap_t* bitmap) {
 }
 
 void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
-    cli();
     File32 f = SD.open(bitmap->filename);
     if (!f) {
-        sei();
         return;
     }
 
@@ -216,7 +205,6 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
 
     if (start_x >= end_x || start_y >= end_y) {
         f.close();
-        sei();
         return;
     }
 
@@ -267,14 +255,11 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
     }
 
     f.close();
-    sei();
 }
 
 void gfx_draw_sprite(gfx_sprite_t* sprite) {
-    cli();
     File32 f = SD.open(sprite->bitmap->filename);
     if (!f) {
-        sei();
         return;
     }
 
@@ -325,7 +310,6 @@ void gfx_draw_sprite(gfx_sprite_t* sprite) {
     }
 
     f.close();
-    sei();
 }
 
 void gfx_set_tilemap(gfx_tilemap_t *map) {
@@ -377,12 +361,34 @@ void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind) {
 }
 
 void gfx_invalidate_sprite(gfx_sprite_t *sprite) {
+    if ((sprite->flags & GFX_DIRTY_BIT) != 0) {
+        return;
+    }
+
     sprite->flags |= GFX_DIRTY_BIT;
-    gfx_push_dirty_rect(
-        sprite->position.x - (sprite->size.x / 2),
-        sprite->position.y,
-        sprite->size.x,
-        sprite->size.y);
+
+    const int16_t x0 = sprite->position.x - (sprite->size.x / 2);
+    const int16_t y0 = sprite->position.y;
+    const int16_t x1 = x0 + sprite->size.x;
+    const int16_t y1 = y0 + sprite->size.y;
+
+    gfx_push_dirty_rect(x0, y0, sprite->size.x, sprite->size.y);
+
+    for (uint8_t i = 0; i < active_scene->sprite_count; i++) {
+        gfx_sprite_t *other = active_scene->sprites[i];
+
+        if (other == sprite) continue;
+        if ((other->flags & GFX_DIRTY_BIT) != 0) continue;
+
+        const int16_t ox0 = other->position.x - (other->size.x / 2);
+        const int16_t oy0 = other->position.y;
+        const int16_t ox1 = ox0 + other->size.x;
+        const int16_t oy1 = oy0 + other->size.y;
+
+        if (x0 < ox1 && x1 > ox0 && y0 < oy1 && y1 > oy0) {
+            gfx_invalidate_sprite(other);
+        }
+    }
 }
 
 gfx_vec2_t gfx_world_to_screen(const gfx_vec2_t vec) {

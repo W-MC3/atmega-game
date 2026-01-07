@@ -12,10 +12,24 @@
 
 #include "game_state.h"
 
+typedef enum {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+    DIR_COUNT // Last value to keep track of enum count
+} e_DIRECTION;
+
 void init_player();
 
 void update_player();
 
 void player_start_game(e_GAME_TYPE role);
+
+gfx_vec2_t player_get_world_position();
+
+gfx_vec2_t player_get_screen_position();
+
+e_GAME_TYPE player_get_role();
 
 #endif //ATMEGA_GAME_PLAYER_H

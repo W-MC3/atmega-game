@@ -17,6 +17,7 @@
 #include "resources.h"
 #include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
+#include "net/proto.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
 #define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime
@@ -42,14 +43,6 @@ gfx_bitmap_t tile_selector;
 gfx_sprite_t player;
 
 // END GFX //
-
-typedef enum {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
-    DIR_COUNT // Last value to keep track of enum count
-} e_DIRECTION;
 
 const gfx_bitmap_t* player_sprite_lut[GAME_TYPE_COUNT][DIR_COUNT] = {
     // RUNNER
@@ -117,6 +110,10 @@ void player_start_game(e_GAME_TYPE role) {
     current_y = 0;
 }
 
+e_GAME_TYPE player_get_role() {
+    return current_game_type;
+}
+
 void add_score() {
     score += 1;
 
@@ -164,7 +161,7 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     }
 
     uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
-    if ((tile_flags[tilemap_index] & TILE_INACCESSIBLE_FLAG) > 0) {
+    if ((tile_flags[tilemap_index] & TILE_INACCESSIBLE_FLAG) > 0 && current_game_type == RUNNER) {
         playerPosition = last_position;
     }
 
@@ -180,6 +177,9 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
     gfx_vec2_t player_screen_pos = gfx_world_to_screen(playerPosition);
     gfx_move_sprite(&player, player_screen_pos.x, player_screen_pos.y);
+
+    uint8_t data[4] = { dir, (uint8_t)(playerPosition.x), (uint8_t)(playerPosition.y), 0 };
+    proto_emit(CMD_MOVE, data);
 }
 
 
@@ -213,4 +213,12 @@ void update_player() {
 
 
     update_game_state();
+}
+
+gfx_vec2_t player_get_screen_position() {
+    return gfx_world_to_screen(playerPosition);
+}
+
+gfx_vec2_t player_get_world_position() {
+    return playerPosition;
 }

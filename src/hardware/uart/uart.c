@@ -74,7 +74,7 @@ void sendNextFromBuffer() {
 void sendUartData(void* data, uint8_t dataLen) {
     uint8_t sreg = SREG;
     cli();
-    dataToSend.bufferStart = data;
+    dataToSend.bufferStart = data; // this is hazardous
     dataToSend.bufferSize = dataLen;
     dataToSend.currentIndex = 0;
     UCSR0B |= (1 << UDRIE0);
