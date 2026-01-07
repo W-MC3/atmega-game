@@ -87,13 +87,14 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    //menu_song = register_sound(TETRIS);
-    //play_sound(&menu_song);
+    menu_song = register_sound(TETRIS);
+    play_sound(&menu_song);
 
     proto_init();
 }
 
 void game_init() {
+    stop_sound_playback();
     init_npc(&player_npc);
 
     if (player_get_role() == DEATH) {
