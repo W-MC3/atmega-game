@@ -60,22 +60,8 @@ static bool load_note_chunk(s_SoundReader *reader) {
     return reader->buffer_count > 0;
 }
 
-extern char __heap_start;
-extern char *__brkval;
-
-int freeRam(void)
-{
-    char top;
-    return &top - (__brkval == 0 ? &__heap_start : __brkval);
-}
-
 s_Sound register_sound(const char *filename) {
-    if (txAvailable()) {
-        int free = freeRam();
-        char msg[16];
-        snprintf(msg, sizeof(msg), "1:RAM: %d\n", free);
-        sendUartData(msg, strlen(msg));
-    }
+
 
     while (!txAvailable()) {}
 
@@ -91,13 +77,6 @@ s_Sound register_sound(const char *filename) {
     sound.reader.buffer_index = 0;
     sound.reader.needs_loading = false;
 
-    if (txAvailable()) {
-        int free = freeRam();
-        char msg[16];
-        snprintf(msg, sizeof(msg), "2:RAM: %d\n", free);
-        sendUartData(msg, strlen(msg));
-    }
-
     while (!txAvailable()) {}
 
     // Open file
@@ -109,21 +88,11 @@ s_Sound register_sound(const char *filename) {
         return sound;
     }
 
-    if (txAvailable()) {
-        char msg[16];
-        snprintf(msg, sizeof(msg), "3:RAM: %d\n", freeRam());
-        sendUartData(msg, strlen(msg));
-    }
-
     while (!txAvailable()) {}
 
     // Read magic number
     char magic[SFD_MAGIC_LEN];
     if (fileReader.read(magic, SFD_MAGIC_LEN) != SFD_MAGIC_LEN) {
-        fileReader.close();
-        return sound;
-    }
-    if (memcmp(magic, SFD_MAGIC, SFD_MAGIC_LEN) != 0) {
         fileReader.close();
         return sound;
     }
@@ -147,13 +116,6 @@ s_Sound register_sound(const char *filename) {
 
     // Preload first chunk
     load_note_chunk(&sound.reader);
-
-    if (txAvailable()) {
-        int free = freeRam();
-        char msg[16];
-        snprintf(msg, sizeof(msg), "4:RAM: %d\n", free);
-        sendUartData(msg, strlen(msg));
-    }
 
     return sound;
 }
@@ -202,12 +164,6 @@ void play_sound(s_Sound *sound_ref) {
 }
 
 static void update_sound_playback(void *arg) {
-    if (txAvailable()) {
-        int free = freeRam();
-        char msg[16];
-        snprintf(msg, sizeof(msg), "RAM: %d\n", free);
-        sendUartData(msg, strlen(msg));
-    }
     s_Sound *sound_ref = static_cast<s_Sound *>(arg);
 
     if (sound_ref == nullptr) {

@@ -335,11 +335,16 @@ void gfx_invalidate_tilemap(gfx_tilemap_t *map) {
 }
 
 void gfx_push_dirty_rect(const int16_t x, const int16_t y, const int16_t width, const int16_t height) {
-    dirty_rects[dirty_rects_count++] = (gfx_rect_t){
+    if (dirty_rects_count >= GFX_TILEMAP_MAX_DIRTY_PER_FRAME) {
+        return;
+    }
+    
+    dirty_rects[dirty_rects_count++] = (gfx_rect_t) {
         .x = x,
         .y = y,
         .width = width,
-        .height = height};
+        .height = height
+    };
 }
 
 void gfx_invalidate_tile(gfx_tilemap_t *map, const int16_t tx, const int16_t ty) {

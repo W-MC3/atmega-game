@@ -8,10 +8,9 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include "ram.h"
 #include "player.h"
 #include "delay.h"
-#include "../lib/PCF8574/PCF8574.h"
-#include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
 #include "resources.h"
@@ -205,7 +204,7 @@ void update_game_state() {
 }
 
 void update_player() {
-
+    print_ram();
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
         playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time);
         update_7_display(playtime_left_ms / 1000);
