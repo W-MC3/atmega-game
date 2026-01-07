@@ -11,7 +11,6 @@
 #include "hardware/i2c/twi.h"
 #include "hardware/ADC/ADC.h"
 #include "hardware/uart/uart.h"
-#include "hardware/Timers/timer_common.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "../lib/scheduler/delay.h"
 #include "../lib/PCF8574/PCF8574.h"
@@ -28,7 +27,7 @@
 #define UART_BAUDRATE 2400
 #define PCF8574_ADDR 0x21
 
-s_Sound main_theme;
+s_Sound menu_song;
 volatile uint8_t adc_value = 0;
 static gfx_scene_t game_scene;
 static game_npc_t player_npc = {
@@ -42,7 +41,9 @@ static game_npc_t player_npc = {
     }
 };
 
-void adcCallback(const uint16_t result) { adc_value = result >> 8; }
+void adcCallback(const uint16_t result) {
+    adc_value = result >> 8;
+}
 
 void startAdc(void)
 {
@@ -86,8 +87,8 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    main_theme = register_sound(TETRIS);
-    play_sound(&main_theme);
+    //menu_song = register_sound(TETRIS);
+    //play_sound(&menu_song);
 
     proto_init();
 }
@@ -181,8 +182,13 @@ void game_update() {
     }
 }
 
+void update_sounds() {
+    update_sound_chunks(&menu_song);
+}
+
 void loop(void) {
     setVolume(adc_value);
+    update_sounds();
 
     while (uartDataAvailable()) {
         proto_recv_byte(readUartByte());
@@ -191,9 +197,7 @@ void loop(void) {
     if (get_game_state() == GAME_RUNNING) {
         update_player();
 
-        cli();
         gfx_frame();
-        sei();
     }
 
     game_update();
