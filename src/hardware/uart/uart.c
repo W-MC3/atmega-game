@@ -50,15 +50,6 @@ void sendUartData(void* data, uint8_t dataLen) {
 }
 
 /**
- * @brief Reports whether the transmitter is ready (always true in blocking mode).
- * @return Always returns true since blocking mode doesn't queue data.
- */
-bool txAvailable() {
-    // In blocking mode, transmitter is always available
-    return true;
-}
-
-/**
  * @brief Checks if a received byte is available (non-blocking check).
  * @return true if RX buffer contains at least one byte.
  */
