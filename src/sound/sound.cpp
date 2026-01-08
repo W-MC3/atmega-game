@@ -58,7 +58,6 @@ static bool load_note_chunk() {
 }
 
 void play_sound(const char *filename, uint16_t frequncy_offset) {
-
     playing_sound.frequency_offset = frequncy_offset;
     playing_sound.looping = false;
 
@@ -116,7 +115,6 @@ void stop_sound_playback(void) {
 }
 
 static void update_sound_playback() {
-
     s_SoundReader *reader = &playing_sound.reader;
 
     // Check if we need to load more notes BEFORE accessing the buffer
@@ -148,7 +146,8 @@ void update_sound_chunks() {
             if (reader->reader_note_index >= reader->note_count) {
                 // End of song
                 if (playing_sound.looping) {
-                    //Restart playing sound
+                    // Restart playing sound, this will go pretty deep in the call stack and may become a problem in the future.
+                    // Tough looping sounds are not used in the game itself, so it will probably be fine
                     play_sound(playing_sound.reader.filename, playing_sound.frequency_offset);
                 }
             }
