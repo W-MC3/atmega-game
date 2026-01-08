@@ -61,16 +61,10 @@ typedef struct {
     s_SoundReader reader;
 } s_Sound;
 
-SOUND_EXTERN_C s_Sound register_sound(const char *filename);
-
-SOUND_EXTERN_C void reset_sound(s_Sound *sound_ref);
-
-SOUND_EXTERN_C void play_sound(s_Sound *sound_ref);
+SOUND_EXTERN_C void play_sound(const char *filename, uint16_t frequncy_offset);
 
 SOUND_EXTERN_C void stop_sound_playback(void);
 
-SOUND_EXTERN_C void set_frequency_offset(s_Sound *sound_ref);
-
-SOUND_EXTERN_C void update_sound_chunks(s_Sound *sound_ref);
+SOUND_EXTERN_C void update_sound_chunks();
 
 #endif //ATMEGA_GAME_SOUND_H

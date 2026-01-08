@@ -27,7 +27,6 @@
 #define UART_BAUDRATE 2400
 #define PCF8574_ADDR 0x21
 
-s_Sound menu_song;
 volatile uint8_t adc_value = 0;
 static gfx_scene_t game_scene;
 static game_npc_t player_npc = {
@@ -87,8 +86,7 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    menu_song = register_sound(TETRIS);
-    play_sound(&menu_song);
+    play_sound(TETRIS, 0);
 
     proto_init();
 }
@@ -184,7 +182,7 @@ void game_update() {
 }
 
 void update_sounds() {
-    update_sound_chunks(&menu_song);
+    update_sound_chunks();
 }
 
 void loop(void) {
@@ -207,6 +205,7 @@ void loop(void) {
 int main(void)
 {
     start();
-    for (;;)
+    for (;;) {
         loop();
+    }
 }

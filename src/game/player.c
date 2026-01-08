@@ -31,9 +31,6 @@ uint16_t current_y = 0;
 
 gfx_vec2_t playerPosition;
 
-s_Sound hop_sound;
-
-
 // GFX //
 gfx_bitmap_t player_BL;
 gfx_bitmap_t player_BR;
@@ -99,8 +96,6 @@ void init_player() {
     gfx_init_bitmap(&tile_selector);
 
     gfx_add_sprite(&player);
-
-    hop_sound = register_sound(HOP);
 }
 
 void player_start_game(e_GAME_TYPE role) {
@@ -186,10 +181,8 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     uint8_t data[4] = { dir, (uint8_t)(playerPosition.x), (uint8_t)(playerPosition.y), 0 };
     proto_emit(CMD_MOVE, data);
 
-    reset_sound(&hop_sound);
-    play_sound(&hop_sound);
+    play_sound(HOP, 0);
 }
-
 
 void update_game_state() {
     // Death can't die
