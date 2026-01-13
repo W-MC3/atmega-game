@@ -360,6 +360,10 @@ void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind) {
     gfx_invalidate_tile(map, tx, ty);
 }
 
+uint8_t gfx_get_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty) {
+    return map->tiles[ty * GFX_TILEMAP_WIDTH + tx];
+}
+
 void gfx_invalidate_sprite(gfx_sprite_t *sprite) {
     if ((sprite->flags & GFX_DIRTY_BIT) != 0) {
         return;

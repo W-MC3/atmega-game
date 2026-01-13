@@ -16,12 +16,13 @@
    ========================================================= */
 static gfx_bitmap_t bmp_grass = {GRASS_TILE};
 static gfx_bitmap_t bmp_water = {WATER_TILE};
-static gfx_bitmap_t bmp_tile = {SPIKE_CLOSED};
+static gfx_bitmap_t bmp_trap_closed = {SPIKE_CLOSED};
+static gfx_bitmap_t bmp_trap_open = {SPIKE_OPEN};
 static gfx_bitmap_t bmp_rock = {STONE_TILE};
 
 static gfx_tilemap_t world_map = {
     GFX_DIRTY_BIT,
-    {&bmp_grass, &bmp_water, &bmp_tile, &bmp_rock},
+    {&bmp_grass, &bmp_water, &bmp_trap_closed, &bmp_rock, &bmp_trap_open},
     {0}
 };
 
@@ -126,7 +127,8 @@ void world_next_level(void) {
 void world_init(void) {
     gfx_init_bitmap(&bmp_grass);
     gfx_init_bitmap(&bmp_water);
-    gfx_init_bitmap(&bmp_tile);
+    gfx_init_bitmap(&bmp_trap_closed);
+    gfx_init_bitmap(&bmp_trap_open);
     gfx_init_bitmap(&bmp_rock);
 
     world_set_seed(0);

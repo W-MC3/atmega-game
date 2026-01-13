@@ -132,6 +132,9 @@ GFX_EXTERN_C void gfx_set_bitmap_sprite(gfx_sprite_t* sprite, gfx_bitmap_t* bitm
 // Changes and invalidates a certain tile
 GFX_EXTERN_C void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind);
 
+// Gets the tile at a specific position
+GFX_EXTERN_C uint8_t gfx_get_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty);
+
 // Sets the active tilemap of the active scene
 GFX_EXTERN_C void gfx_set_tilemap(gfx_tilemap_t *map);
 

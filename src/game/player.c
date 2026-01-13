@@ -190,17 +190,29 @@ void update_game_state() {
         if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 0) {
             game_over(0);
         }
-        if (playtime_left_ms < 0) {
-            game_over(0);
-        }
+
+        // mikaib: This code is very broken and must be fixed.
+        // if (playtime_left_ms < 0) {
+        //     game_over(0);
+        // }
     }
+}
+
+void mark_deadly_tile(gfx_vec2_t world_pos) {
+    uint16_t tilemap_index = (world_pos.y) * GFX_TILEMAP_WIDTH + world_pos.x;
+    tile_flags[tilemap_index] |= TILE_DEADLY_FLAG;
+}
+
+void unmark_deadly_tile(gfx_vec2_t world_pos) {
+    uint16_t tilemap_index = (world_pos.y) * GFX_TILEMAP_WIDTH + world_pos.x;
+    tile_flags[tilemap_index] &= ~TILE_DEADLY_FLAG;
 }
 
 void update_player() {
 
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
-        playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time);
-        update_7_display(playtime_left_ms / 1000);
+        playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time); // mikaib: Is the intent here to exponentially decrease the time left?
+        update_7_display(playtime_left_ms / 1000); // mikaib: there is no bounds checking so we can pass negative values which will display the contents of memory ahead of where the mapping for the 7-segment display is located.
         if (nunchuk_get_state(NUNCHUK_ADDR)) {
             last_hop_time = scheduler_millis();
 
