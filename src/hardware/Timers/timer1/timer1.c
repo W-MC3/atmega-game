@@ -10,10 +10,10 @@
 #include <stdint.h>
 #include "timer1.h"
 
-static void (*inputCaptureCallback)(void) = NULL;
-static void (*CompBMatchCallback)(void) = NULL;
-static void (*CompAMatchCallback)(void) = NULL;
-static void (*TimerOverflowCallback)(void) = NULL;
+volatile static void (*inputCaptureCallback)(void) = NULL;
+volatile static void (*CompBMatchCallback)(void) = NULL;
+volatile static void (*CompAMatchCallback)(void) = NULL;
+volatile static void (*TimerOverflowCallback)(void) = NULL;
 
 void initTimer1(const s_TIM1_CONFIG *config) {
     TCCR1A = (config->waveformGenerationMode & (1 << WGM11 | 1 << WGM10))

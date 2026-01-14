@@ -11,7 +11,7 @@
 
 #include <avr/interrupt.h>
 
-typedef void (*TimerCallback)(void);
+volatile typedef void (*TimerCallback)(void);
 
 typedef enum {
     TIM2_DisconnectedOC2ACompareMatch = 0,

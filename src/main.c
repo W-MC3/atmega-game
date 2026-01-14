@@ -88,7 +88,7 @@ void start(void)
 
     init_system_timer();
     startAdc();
-    // initTone();
+    initTone();
     gfx_init();
     world_init();
 
@@ -100,7 +100,7 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    // play_sound(TETRIS, 0);
+    play_sound(TETRIS, 0);
 
     proto_init();
     init_npc(&player_npc);
@@ -288,7 +288,7 @@ void game_update() {
 
 void loop(void) {
     setVolume(adc_value);
-    // update_sound_chunks();
+    update_sound_chunks();
 
     while (uartDataAvailable()) {
         proto_recv_byte(readUartByte());

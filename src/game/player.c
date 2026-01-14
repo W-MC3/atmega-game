@@ -18,6 +18,7 @@
 #include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
 #include "net/proto.h"
+#include "sound/sound.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
 #define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime
@@ -135,6 +136,10 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
     if (abs(x) < DEADZONE && abs(y) < DEADZONE) {
         return;
+    }
+
+    if (current_game_type == RUNNER) {
+        play_sound(HOP, 0);
     }
 
     gfx_vec2_t last_position = playerPosition;

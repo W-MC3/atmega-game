@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include "timer0.h"
 
-static void (*CompBMatchCallback)(void) = NULL;
-static void (*CompAMatchCallback)(void) = NULL;
-static void (*TimerOverflowCallback)(void) = NULL;
+volatile static void (*CompBMatchCallback)(void) = NULL;
+volatile static void (*CompAMatchCallback)(void) = NULL;
+volatile static void (*TimerOverflowCallback)(void) = NULL;
 
 void initTimer0(const s_TIM0_CONFIG *config) {
     TCCR0A = (config->waveformGenerationMode & (1 << WGM01 | 1 << WGM00))
