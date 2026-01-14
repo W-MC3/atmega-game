@@ -10,7 +10,7 @@
 
 #define PROTO_PACKET_MAX_DATA_SIZE 4
 
-#define CMD_NOOP          0xFF // NO-OP
+#define CMD_NOOP          0xFD // NO-OP
 // note: can be added if needed later on, realistically, it may not make sense... ~mikaib
 // #define CMD_NACK          0x00 // Not ACKnowledge packet
 // #define CMD_ACK           0x01 // ACKnowledge packet
@@ -22,6 +22,7 @@
 #define CMD_START         0x07 // Start game (no data)
 #define CMD_ACTIVATE_TRAP 0x08 // Activate trap (2x uint8_t)
 #define CMD_NEXT_SCENE    0x09 // Move to next scene (no data)
+#define CMD_GAME_OVER     0x0A // Game over (1x uint16_t)
 
 typedef struct proto_packet {
     uint8_t opcode;

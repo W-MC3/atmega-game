@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "game_state.h"
 #include "player.h"
+#include "print.h"
 #include "gfx/gfx.h"
 #include "net/proto.h"
 #include "world_generation/world.h"
@@ -39,6 +40,9 @@ void start_game(e_GAME_TYPE type) {
 void game_over(uint16_t score) {
     game_state = GAME_OVER;
     save_high_score(score);
+
+    uint8_t data[4] = { 0 };
+    proto_emit(CMD_GAME_OVER, data);
 }
 
 enum Game_State get_game_state() {
