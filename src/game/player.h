@@ -26,6 +26,10 @@ void update_player();
 
 void player_start_game(e_GAME_TYPE role);
 
+void unmark_deadly_tile(gfx_vec2_t world_pos);
+
+void mark_deadly_tile(gfx_vec2_t world_pos);
+
 gfx_vec2_t player_get_world_position();
 
 gfx_vec2_t player_get_screen_position();

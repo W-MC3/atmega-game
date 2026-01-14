@@ -40,9 +40,11 @@ static game_npc_t player_npc = {
     }
 };
 
-void adcCallback(const uint16_t result) {
-    adc_value = result >> 8;
-}
+static const int8_t trap_lookup[] = {
+    [2] = 4
+};
+
+void adcCallback(const uint16_t result) { adc_value = result >> 8; }
 
 void startAdc(void)
 {
@@ -100,16 +102,45 @@ void game_init() {
     }
 }
 
-uint16_t world_pos_to_idx(gfx_vec2_t world_pos) {
-    return world_pos.x + world_pos.y * GFX_TILEMAP_TILE_WIDTH;
+bool is_trap_kind(uint8_t index) {
+    size_t len = sizeof(trap_lookup) / sizeof(trap_lookup[0]);
+    if (index >= len) return false;
+    return trap_lookup[index] != 0;
 }
 
-gfx_vec2_t idx_to_world_pos(uint16_t idx) {
-    return (gfx_vec2_t){ .x = idx % GFX_TILEMAP_TILE_WIDTH, .y = (int16_t)(idx / GFX_TILEMAP_TILE_WIDTH) };
+uint8_t get_active_tile(uint8_t current_tile) {
+    size_t len = sizeof(trap_lookup) / sizeof(trap_lookup[0]);
+    if (current_tile < len && trap_lookup[current_tile] != 0) {
+        return (uint8_t)trap_lookup[current_tile];
+    }
+
+    return current_tile;
+}
+
+uint8_t get_inactive_tile(uint8_t current_tile) {
+    for (size_t i = 0; i < sizeof(trap_lookup) / sizeof(trap_lookup[0]); i++) {
+        if (trap_lookup[i] == current_tile) {
+            return (uint8_t)i;
+        }
+    }
+
+    return current_tile;
 }
 
 void activate_trap(gfx_vec2_t world_pos) {
-    return; // TODO: impl
+    gfx_tilemap_t* tilemap = world_get_tilemap();
+    uint8_t current_tile = gfx_get_tile(tilemap, world_pos.x, world_pos.y);
+
+    if (!is_trap_kind(current_tile)) {
+        return;
+    }
+
+    uint8_t desired_tile = get_active_tile(current_tile);
+
+    gfx_set_tile(tilemap, world_pos.x, world_pos.y, desired_tile);
+    mark_deadly_tile(world_pos);
+
+    restore_in[world_pos.y * GFX_TILEMAP_WIDTH + world_pos.x] = scheduler_millis() + 2000;
 }
 
 void game_update_net() {
