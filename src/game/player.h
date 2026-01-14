@@ -26,14 +26,20 @@ void update_player();
 
 void player_start_game(e_GAME_TYPE role);
 
-void unmark_deadly_tile(gfx_vec2_t world_pos);
-
-void mark_deadly_tile(gfx_vec2_t world_pos);
-
 gfx_vec2_t player_get_world_position();
 
 gfx_vec2_t player_get_screen_position();
 
 e_GAME_TYPE player_get_role();
+
+void player_reset_position();
+
+void reset_playtime();
+
+uint16_t player_get_score();
+
+void mark_tile_trap(gfx_vec2_t world_pos);
+
+void unmark_tile_trap(gfx_vec2_t world_pos);
 
 #endif //ATMEGA_GAME_PLAYER_H

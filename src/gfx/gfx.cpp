@@ -335,16 +335,11 @@ void gfx_invalidate_tilemap(gfx_tilemap_t *map) {
 }
 
 void gfx_push_dirty_rect(const int16_t x, const int16_t y, const int16_t width, const int16_t height) {
-    if (dirty_rects_count >= GFX_TILEMAP_MAX_DIRTY_PER_FRAME) {
-        return;
-    }
-    
-    dirty_rects[dirty_rects_count++] = (gfx_rect_t) {
+    dirty_rects[dirty_rects_count++] = (gfx_rect_t){
         .x = x,
         .y = y,
         .width = width,
-        .height = height
-    };
+        .height = height};
 }
 
 void gfx_invalidate_tile(gfx_tilemap_t *map, const int16_t tx, const int16_t ty) {
@@ -421,3 +416,18 @@ gfx_vec2_t gfx_screen_to_world(const gfx_vec2_t vec) {
         .y = (int16_t)floorf(fy)
     };
 }
+
+void gfx_begin_batch(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+    tft.startWrite();
+    tft.setAddrWindow(x, y, width, height);
+}
+
+void gfx_end_batch() {
+    tft.endWrite();
+}
+
+void gfx_push_pixel(uint16_t colour) {
+    tft.pushColor(colour);
+}
+
+

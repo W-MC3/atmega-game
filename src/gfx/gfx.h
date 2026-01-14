@@ -132,7 +132,7 @@ GFX_EXTERN_C void gfx_set_bitmap_sprite(gfx_sprite_t* sprite, gfx_bitmap_t* bitm
 // Changes and invalidates a certain tile
 GFX_EXTERN_C void gfx_set_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty, uint8_t kind);
 
-// Gets the tile at a specific position
+// Get the current tile
 GFX_EXTERN_C uint8_t gfx_get_tile(gfx_tilemap_t *map, int16_t tx, int16_t ty);
 
 // Sets the active tilemap of the active scene
@@ -164,6 +164,15 @@ GFX_EXTERN_C gfx_vec2_t gfx_world_to_screen(gfx_vec2_t vec);
 
 // Transform a screen to world coordinate
 GFX_EXTERN_C gfx_vec2_t gfx_screen_to_world(gfx_vec2_t vec);
+
+// Begin pixel batch
+GFX_EXTERN_C void gfx_begin_batch(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+
+// End pixel batch
+GFX_EXTERN_C void gfx_end_batch();
+
+// Set pixel
+GFX_EXTERN_C void gfx_push_pixel(uint16_t colour);
 
 #ifndef GFX_FULLSCREEN
 #define GFX_FULLSCREEN ((gfx_rect_t){0, 0, 240, 320})
