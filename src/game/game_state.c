@@ -16,6 +16,7 @@
 #include "print.h"
 #include "gfx/gfx.h"
 #include "resources.h"
+#include "net/proto.h"
 
 enum Game_State game_state = GAME_IDLE;
 
