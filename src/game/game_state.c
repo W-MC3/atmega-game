@@ -16,6 +16,7 @@
 #include "print.h"
 #include "gfx/gfx.h"
 #include "resources.h"
+#include "gfx/gravur.h"
 #include "net/proto.h"
 #include "world_generation/world.h"
 
@@ -40,6 +41,10 @@ void save_high_score(uint16_t score) {
     // TODO: Check highscore and compare it with the current score
 }
 
+uint16_t get_high_score() {
+    return 0; // TODO: impl
+}
+
 void start_game(e_GAME_TYPE type) {
     player_start_game(type);
     game_state = GAME_RUNNING;
@@ -53,6 +58,8 @@ void game_over(uint16_t score) {
     proto_emit(CMD_GAME_OVER, data);
 
     show_fullscreen(GAMEOVER_SCREEN);
+    gravur_write_integer(142, 123, 2, false, score);
+    gravur_write_integer(142, 139, 2, false, get_high_score());
 }
 
 enum Game_State get_game_state() {

@@ -203,6 +203,7 @@ void game_update_net() {
             }
 
             case CMD_START: {
+                stop_sound_playback();
                 start_game(RUNNER);
                 game_init();
                 break;
@@ -242,6 +243,8 @@ void game_update() {
         case GAME_IDLE:
         case GAME_OVER:
             if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
+                stop_sound_playback();
+
                 uint8_t data[4] = { 0 };
                 proto_emit(CMD_START, data);
 

@@ -196,10 +196,10 @@ void update_game_state() {
     if (current_game_type == RUNNER) {
         uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
         if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 0) {
-            game_over(0);
+            game_over(score);
         }
         if (playtime_left_ms == 0) {
-            game_over(0);
+            game_over(score);
         }
     }
 }
