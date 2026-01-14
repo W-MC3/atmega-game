@@ -21,11 +21,12 @@
 #define SELECTOR "E"
 
 #define HOMESCREEN "Q"
+#define GAMEOVER_SCREEN "R"
 
 #define SPIKE_CLOSED "F"
 #define SPIKE_OPEN "G"
 
-#define ZELDA "Y"
+#define HOP "Y"
 #define TETRIS "Z"
 
 

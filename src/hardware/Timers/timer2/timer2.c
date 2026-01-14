@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include "timer2.h"
 
-static void (*CompBMatchCallback)(void) = NULL;
-static void (*CompAMatchCallback)(void) = NULL;
-static void (*TimerOverflowCallback)(void) = NULL;
+volatile static void (*CompBMatchCallback)(void) = NULL;
+volatile static void (*CompAMatchCallback)(void) = NULL;
+volatile static void (*TimerOverflowCallback)(void) = NULL;
 
 void initTimer2(const s_TIM2_CONFIG *config) {
     TCCR2A = (config->waveformGenerationMode & (1 << WGM21 | 1 << WGM20))

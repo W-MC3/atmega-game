@@ -8,6 +8,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "eeprom.h"
 
 // Wait till previous transfer completes
 static void eeprom_wait(void) {

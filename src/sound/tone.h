@@ -11,13 +11,13 @@
 extern "C" {
 #endif
 
-void timer0CompareCallback(void);
+    void timer0CompareCallback(void);
 
-void setVolume(uint8_t volume);
+    void setVolume(uint8_t volume);
 
-void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void *arg), void *arg);
+    void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)());
 
-void initTone(void);
+    void initTone(void);
 
 #ifdef __cplusplus
 }

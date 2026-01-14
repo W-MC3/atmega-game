@@ -24,6 +24,9 @@
 #include "resources.h"
 #include "game/npc.h"
 #include "gfx/gravur.h"
+#include <avr/wdt.h>
+
+#include "../lib/eeprom/eeprom.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 2400
@@ -88,11 +91,11 @@ void start(void)
 
     init_system_timer();
     startAdc();
-    // initTone();
+    initTone();
     gfx_init();
     world_init();
 
-    show_boot_screen();
+    show_fullscreen(HOMESCREEN);
 
     game_scene.tilemap = world_get_tilemap();
     game_scene.sprite_count = 0;
@@ -100,18 +103,20 @@ void start(void)
     gfx_set_scene(&game_scene);
 
     init_player();
-    // main_theme = register_sound(TETRIS);
-    // play_sound(&main_theme);
+    play_sound(TETRIS, 0);
 
     proto_init();
+    init_npc(&player_npc);
 }
 
 void game_init() {
-    init_npc(&player_npc);
-
     if (player_get_role() == DEATH) {
         gfx_add_sprite(&(player_npc.sprite));
     }
+
+    traps_size = 0;
+    world_next_level();
+    move_npc(&player_npc, 0, 500, 500);
 }
 
 uint8_t get_active_variant(uint8_t kind) {
@@ -201,6 +206,7 @@ void game_update_net() {
             }
 
             case CMD_START: {
+                stop_sound_playback();
                 start_game(RUNNER);
                 game_init();
                 break;
@@ -220,7 +226,12 @@ void game_update_net() {
             }
 
             case CMD_GAME_OVER: {
-                // TODO: impl
+                if (player_get_role() == DEATH) {
+                    gfx_remove_sprite(&(player_npc.sprite));
+                }
+
+                show_fullscreen(HOMESCREEN);
+                set_game_state(GAME_OVER);
                 break; // death won, runner lost
             }
 
@@ -233,7 +244,10 @@ void game_update_net() {
 void game_update() {
     switch (get_game_state()) {
         case GAME_IDLE:
+        case GAME_OVER: {
             if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
+                stop_sound_playback();
+
                 uint8_t data[4] = { 0 };
                 proto_emit(CMD_START, data);
 
@@ -241,7 +255,14 @@ void game_update() {
                 game_init();
             }
 
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.c_button) {
+                eeprom_write_uint16(0x00, 0); // reset highscore
+                wdt_enable(WDTO_15MS);
+                while (1);
+            }
+
             break;
+        }
 
         case GAME_RUNNING:
             if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button && player_get_role() == DEATH) {
@@ -277,6 +298,7 @@ void game_update() {
 
 void loop(void) {
     setVolume(adc_value);
+    update_sound_chunks();
 
     while (uartDataAvailable()) {
         proto_recv_byte(readUartByte());
@@ -289,7 +311,10 @@ void loop(void) {
         update_traps();
 
         // cli();
-        gfx_frame();
+        if (get_game_state() == GAME_RUNNING) // hack, but in certain situations the state may have been changed.
+        {
+            gfx_frame();
+        }
         // sei();
     }
 

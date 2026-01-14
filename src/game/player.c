@@ -18,6 +18,7 @@
 #include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
 #include "net/proto.h"
+#include "sound/sound.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
 #define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime
@@ -82,7 +83,7 @@ void init_player() {
     };
 
     player = (gfx_sprite_t){
-        .position = { 0, 0 },
+        .position = { 500, 500 },
         .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
         .bitmap = &player_BL
     };
@@ -104,9 +105,11 @@ void player_start_game(e_GAME_TYPE role) {
         gfx_set_bitmap_sprite(&player, &tile_selector);
     }
 
+    player_reset_position();
     playtime_left_ms = FULL_PLAYTIME;
     last_hop_time = scheduler_millis();
     score = 0;
+    maxY = 0;
 }
 
 e_GAME_TYPE player_get_role() {
@@ -133,6 +136,10 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
     if (abs(x) < DEADZONE && abs(y) < DEADZONE) {
         return;
+    }
+
+    if (current_game_type == RUNNER) {
+        // play_sound(HOP, 0);
     }
 
     gfx_vec2_t last_position = playerPosition;
@@ -194,10 +201,10 @@ void update_game_state() {
     if (current_game_type == RUNNER) {
         uint16_t tilemap_index = (playerPosition.y) * GFX_TILEMAP_WIDTH + playerPosition.x;
         if ((tile_flags[tilemap_index] & TILE_DEADLY_FLAG) > 0) {
-            game_over(0);
+            game_over(score);
         }
         if (playtime_left_ms == 0) {
-            game_over(0);
+            game_over(score);
         }
     }
 }

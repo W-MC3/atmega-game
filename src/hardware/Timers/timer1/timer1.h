@@ -57,7 +57,7 @@ typedef enum {
     PinTRisingEdge = (1 << CS12) | (1 << CS11) | (1 << CS10),
 } e_TIM1_ClockSource;
 
-typedef void (*TimerCallback)(void);
+volatile typedef void (*TimerCallback)(void);
 
 typedef struct {
     e_TIM1_CompareOutputModeChanA compareOutputModeA;
