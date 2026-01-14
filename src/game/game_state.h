@@ -24,7 +24,7 @@ enum Game_State {
     GAME_OVER,
 };
 
-void init_scene();
+void show_boot_screen();
 
 void start_game(e_GAME_TYPE type);
 

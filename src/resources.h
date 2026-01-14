@@ -20,6 +20,8 @@
 #define CHECKERBOARD_TILE "D"
 #define SELECTOR "E"
 
+#define HOMESCREEN "Q"
+
 #define SPIKE_CLOSED "F"
 #define SPIKE_OPEN "G"
 
