@@ -55,37 +55,33 @@ typedef struct {
 } uart_config_t;
 
 /**
- * @brief Indicates whether the transmitter is ready (always true in blocking mode).
- * @return Always returns true since blocking mode doesn't queue data.
+ * @brief Indicates whether the transmitter is idle.
+ * @return true if no transmit buffer is active, else false.
  */
 bool txAvailable();
 
 /**
- * @brief Initializes the UART peripheral in blocking mode (no interrupts).
+ * @brief Initializes the UART peripheral.
  * @param config UART configuration parameters.
  */
 void initUart(uart_config_t config);
 
 /**
- * @brief Sends a buffer via UART using blocking transmission.
+ * @brief Sends a buffer via UART using interrupt-driven transmission.
  * @param data Pointer to the buffer to send.
  * @param dataLen Number of bytes to send.
- * 
- * This function blocks until all bytes have been transmitted.
  */
 void sendUartData(void* data, uint8_t dataLen);
 
 /**
- * @brief Checks if a received byte is available (non-blocking check).
+ * @brief Checks if a received byte is available.
  * @return true if RX buffer contains at least one byte.
  */
 bool uartDataAvailable();
 
 /**
- * @brief Reads one byte from UART (blocking).
- * @return The byte read.
- * 
- * This function blocks until a byte is received.
+ * @brief Reads one byte from the RX buffer.
+ * @return The byte read, or 0 if buffer is empty.
  */
 uint8_t readUartByte();
 
