@@ -82,7 +82,7 @@ void init_player() {
     };
 
     player = (gfx_sprite_t){
-        .position = { 0, 0 },
+        .position = { 500, 500 },
         .size = { GFX_TILEMAP_TILE_WIDTH, GFX_TILEMAP_TILE_HEIGHT },
         .bitmap = &player_BL
     };
@@ -104,9 +104,11 @@ void player_start_game(e_GAME_TYPE role) {
         gfx_set_bitmap_sprite(&player, &tile_selector);
     }
 
+    player_reset_position();
     playtime_left_ms = FULL_PLAYTIME;
     last_hop_time = scheduler_millis();
     score = 0;
+    maxY = 0;
 }
 
 e_GAME_TYPE player_get_role() {

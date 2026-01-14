@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include "gfx/gfx.h"
 
-
 #define TILE_DEADLY_FLAG (1 << 1)
 #define TILE_INACCESSIBLE_FLAG (1 << 2)
 
@@ -24,12 +23,14 @@ enum Game_State {
     GAME_OVER,
 };
 
-void show_boot_screen();
+void show_fullscreen(const char* filename);
 
 void start_game(e_GAME_TYPE type);
 
 void game_over(uint16_t score);
 
 enum Game_State get_game_state();
+
+void set_game_state(enum Game_State state);
 
 #endif //ATMEGA_GAME_GAME_STATE_H

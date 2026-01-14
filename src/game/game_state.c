@@ -17,13 +17,13 @@
 #include "gfx/gfx.h"
 #include "resources.h"
 #include "net/proto.h"
+#include "world_generation/world.h"
 
 enum Game_State game_state = GAME_IDLE;
 
-void show_boot_screen() {
-
+void show_fullscreen(const char* filename) {
     gfx_bitmap_t start_game_bitmap = {
-        .filename = HOMESCREEN
+        .filename = filename
     };
 
     gfx_sprite_t start_game_sprite = (gfx_sprite_t){
@@ -32,16 +32,8 @@ void show_boot_screen() {
         .bitmap = &start_game_bitmap,
     };
 
-    gfx_scene_t UI_scene = (gfx_scene_t){
-        .tilemap = NULL,
-        .sprites = {&start_game_sprite},
-        .sprite_count = 1,
-    };
-
     gfx_init_bitmap(&start_game_bitmap);
-    gfx_set_scene(&UI_scene);
     gfx_draw_sprite(&start_game_sprite);
-    gfx_frame();
 }
 
 void save_high_score(uint16_t score) {
@@ -59,8 +51,14 @@ void game_over(uint16_t score) {
 
     uint8_t data[4] = { 0 };
     proto_emit(CMD_GAME_OVER, data);
+
+    show_fullscreen(GAMEOVER_SCREEN);
 }
 
 enum Game_State get_game_state() {
     return game_state;
+}
+
+void set_game_state(enum Game_State state) {
+    game_state = state;
 }
