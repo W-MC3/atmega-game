@@ -139,7 +139,7 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
     }
 
     if (current_game_type == RUNNER) {
-        play_sound(HOP, 0);
+        // play_sound(HOP, 0);
     }
 
     gfx_vec2_t last_position = playerPosition;

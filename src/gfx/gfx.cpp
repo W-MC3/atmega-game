@@ -5,8 +5,7 @@
 #define SDCARD_CS_PIN 4
 #define ILI9341_CS_PIN 10 // <= /CS pin (chip-select, LOW to get attention of ILI9341, HIGH and it ignores SPI bus)
 #define ILI9341_DC_PIN 9  // <= DC pin (1=data or 0=command indicator line) also called RS
-
-#define PIXELS_PER_READ 32
+#define PIXELS_PER_READ 16
 
 #include <gfx/gfx.h>
 #include <util/delay.h>
@@ -258,8 +257,6 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
 
     f.close();
 }
-
-#define PIXELS_PER_READ 16  // number of pixels to read per chunk
 
 void gfx_draw_sprite(gfx_sprite_t* sprite) {
     File32 f = SD.open(sprite->bitmap->filename);

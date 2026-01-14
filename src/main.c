@@ -24,6 +24,9 @@
 #include "resources.h"
 #include "game/npc.h"
 #include "gfx/gravur.h"
+#include <avr/wdt.h>
+
+#include "../lib/eeprom/eeprom.h"
 
 #define NUNCHUK_ADDR 0x52
 #define UART_BAUDRATE 2400
@@ -241,7 +244,7 @@ void game_update_net() {
 void game_update() {
     switch (get_game_state()) {
         case GAME_IDLE:
-        case GAME_OVER:
+        case GAME_OVER: {
             if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button) {
                 stop_sound_playback();
 
@@ -252,7 +255,14 @@ void game_update() {
                 game_init();
             }
 
+            if (nunchuk_get_state(NUNCHUK_ADDR) && state.c_button) {
+                eeprom_write_uint16(0x00, 0); // reset highscore
+                wdt_enable(WDTO_15MS);
+                while (1);
+            }
+
             break;
+        }
 
         case GAME_RUNNING:
             if (nunchuk_get_state(NUNCHUK_ADDR) && state.z_button && player_get_role() == DEATH) {
