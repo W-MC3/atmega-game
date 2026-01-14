@@ -6,6 +6,8 @@
 #define ILI9341_CS_PIN 10 // <= /CS pin (chip-select, LOW to get attention of ILI9341, HIGH and it ignores SPI bus)
 #define ILI9341_DC_PIN 9  // <= DC pin (1=data or 0=command indicator line) also called RS
 
+#define PIXELS_PER_READ 32
+
 #include <gfx/gfx.h>
 #include <util/delay.h>
 #include <SdFat_Adafruit_Fork.h>
@@ -257,60 +259,64 @@ void gfx_draw_tile(gfx_vec2_t position, gfx_bitmap_t* bitmap, gfx_rect_t rect) {
     f.close();
 }
 
+#define PIXELS_PER_READ 16  // number of pixels to read per chunk
+
 void gfx_draw_sprite(gfx_sprite_t* sprite) {
     File32 f = SD.open(sprite->bitmap->filename);
     if (!f) {
         return;
     }
 
-    uint8_t row[sprite->bitmap->row_size];
-
     const int16_t sprite_x = sprite->position.x - (sprite->size.x / 2);
     const int16_t sprite_y = sprite->position.y;
 
+    uint8_t chunk[PIXELS_PER_READ * 3]; // 3 bytes per pixel
+
     for (int16_t y = sprite->size.y - 1; y >= 0; y--) {
         uint32_t rowOffset = sprite->bitmap->offset + (uint32_t)(sprite->size.y - 1 - y) * sprite->bitmap->row_size;
-        f.seek(rowOffset);
-        f.read(row, sprite->bitmap->row_size);
+        int16_t pixels_remaining = sprite->size.x;
+        int16_t x_pos = 0;
 
-        int16_t span_start = -1;
+        while (pixels_remaining > 0) {
+            int16_t chunk_length = min(pixels_remaining, PIXELS_PER_READ);
+            f.seek(x_pos * 3 + rowOffset);
+            f.read(chunk, chunk_length * 3);
 
-        for (int16_t x = 0; x <= sprite->size.x; x++) {
-            bool is_transparent = false;
+            int16_t span_start = -1;
 
-            if (x < sprite->size.x) {
-                const uint8_t b = row[(x * 3) + 0];
-                const uint8_t g = row[(x * 3) + 1];
-                const uint8_t r = row[(x * 3) + 2];
-                is_transparent = ((r | g | b) == 0);
-            } else {
-                is_transparent = true;
-            }
+            for (int16_t sx = 0; sx < chunk_length; sx++) {
+                const uint8_t b = chunk[sx * 3 + 0];
+                const uint8_t g = chunk[sx * 3 + 1];
+                const uint8_t r = chunk[sx * 3 + 2];
+                bool is_transparent = (r | g | b) == 0;
 
-            if (!is_transparent && span_start == -1) {
-                span_start = x;
-            } else if ((is_transparent || x == sprite->size.x) && span_start != -1) {
-                int16_t span_width = x - span_start;
+                if (!is_transparent && span_start == -1) {
+                    span_start = x_pos + sx;
+                } else if ((is_transparent || sx == chunk_length - 1) && span_start != -1) {
+                    int16_t span_end = (is_transparent) ? (x_pos + sx) : (x_pos + sx + 1);
+                    int16_t span_width = span_end - span_start;
 
-                tft.startWrite();
-                tft.setAddrWindow(sprite_x + span_start, sprite_y + y, span_width, 1);
-
-                for (int16_t sx = span_start; sx < x; sx++) {
-                    const uint8_t b = row[(sx * 3) + 0];
-                    const uint8_t g = row[(sx * 3) + 1];
-                    const uint8_t r = row[(sx * 3) + 2];
-                    const uint16_t color = tft.color565(r, g, b);
-                    tft.pushColor(color);
+                    tft.startWrite();
+                    tft.setAddrWindow(sprite_x + span_start, sprite_y + y, span_width, 1);
+                    for (int16_t px = span_start; px < span_end; px++) {
+                        int16_t local_x = px - x_pos;
+                        uint8_t b = chunk[local_x * 3 + 0];
+                        uint8_t g = chunk[local_x * 3 + 1];
+                        uint8_t r = chunk[local_x * 3 + 2];
+                        tft.pushColor(tft.color565(r, g, b));
+                    }
+                    tft.endWrite();
+                    span_start = -1;
                 }
-
-                tft.endWrite();
-                span_start = -1;
             }
+
+            x_pos += chunk_length;
+            pixels_remaining -= chunk_length;
         }
     }
-
     f.close();
 }
+
 
 void gfx_set_tilemap(gfx_tilemap_t *map) {
     if (active_scene == NULL) {
