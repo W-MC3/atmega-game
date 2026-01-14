@@ -16,24 +16,26 @@
 #include "../../lib/scheduler/delay.h"
 
 static volatile bool buzzerEnabled = false;
+bool playing_tone = false;
 
 volatile uint32_t toneStartTime = 0;
 volatile uint16_t toneDuration = 0;
-static void (* volatile toneDoneCallback)(void *arg) = NULL;
-void *argument;
+static void (* volatile toneDoneCallback)() = NULL;
 
 volatile e_TIM0_ClockSource timer0_stored_prescaler = (e_TIM0_ClockSource)0;
 
 void timer0CompareCallback(void) {
-    buzzerEnabled = !buzzerEnabled;
-    if (buzzerEnabled) {
-        // Disable PWM output from Timer2 (mute) and disable it's clock source
-        timer0_stored_prescaler = (e_TIM0_ClockSource)(TCCR0B & 0x07);
-        setCompareOutputModeBTimer2(TIM2_DisconnectedOC2BCompareMatch);
-    } else {
-        // Enable PWM output from Timer2 (sound)
-        setTimer0ClockSource(timer0_stored_prescaler);
-        setCompareOutputModeBTimer2(TIM2_ClearOC2BCompareMatch);
+    if (playing_tone) {
+        buzzerEnabled = !buzzerEnabled;
+        if (buzzerEnabled) {
+            // Disable PWM output from Timer2 (mute) and disable it's clock source
+            timer0_stored_prescaler = (e_TIM0_ClockSource)(TCCR0B & 0x07);
+            setCompareOutputModeBTimer2(TIM2_DisconnectedOC2BCompareMatch);
+        } else {
+            // Enable PWM output from Timer2 (sound)
+            setTimer0ClockSource(timer0_stored_prescaler);
+            setCompareOutputModeBTimer2(TIM2_ClearOC2BCompareMatch);
+        }
     }
 
     if (toneDuration == 0) {
@@ -42,7 +44,7 @@ void timer0CompareCallback(void) {
 
     if (scheduler_millis() - toneStartTime >= toneDuration && toneDoneCallback != NULL) {
         toneDuration = 0;
-        toneDoneCallback(argument);
+        toneDoneCallback();
     }
 }
 
@@ -50,12 +52,12 @@ void setVolume(uint8_t volume) {
     setOCR2B(volume);
 }
 
-void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)(void *), void *arg) {
+void playTone(uint16_t frequency, uint16_t duration, void (*toneCallback)()) {
     toneDoneCallback = toneCallback;
     toneStartTime = scheduler_millis();
     toneDuration = duration;
-    argument = arg;
 
+    playing_tone = frequency != 0;
     if (frequency == 0) {
         return;
     }

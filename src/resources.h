@@ -23,7 +23,7 @@
 #define SPIKE_CLOSED "F"
 #define SPIKE_OPEN "G"
 
-#define ZELDA "Y"
+#define HOP "Y"
 #define TETRIS "Z"
 
 

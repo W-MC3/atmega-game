@@ -77,9 +77,7 @@ void proto_emit(uint8_t op, uint8_t data[PROTO_PACKET_MAX_DATA_SIZE]) {
 
     memcpy(&buf[4], data, PROTO_PACKET_MAX_DATA_SIZE); // copies in the remaining data
 
-    while (!txAvailable()) {} // perhaps we should use a callback or interrupt?
     sendUartData(buf, PROTO_PACKET_SIZE + 1);
-    while (!txAvailable()) {} // otherwise buf[4] gets evicted from the stack... aaahh
 }
 
 uint32_t proto_get_uint32(proto_packet_t* packet, uint8_t idx) {

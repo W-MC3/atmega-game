@@ -1,0 +1,8 @@
+{
+  "looping": false,
+  "notes": [
+    { "frequency": 220, "duration": 20 },
+    { "frequency": 320, "duration": 30 },
+    { "frequency": 260, "duration": 15 }
+  ]
+}

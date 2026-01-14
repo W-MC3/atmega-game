@@ -14,5 +14,8 @@ uint8_t numToPins[] = {
 };
 
 void update_7_display(const uint8_t num) {
+ if (num < 0 || num > 9) {
+  return;
+ }
  pcf8574_write(numToPins[num]);
 }

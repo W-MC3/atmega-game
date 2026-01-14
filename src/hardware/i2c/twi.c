@@ -217,9 +217,9 @@ void TWI_Stop(void)
  * @return  void
  */
 void TWI_Error(char status, char expected)
-{ 
+{
   // some procedure
-  
-  // error status  
+
+  // error status
 //  _twi_error_stat = TWI_STATUS_INIT;
 }

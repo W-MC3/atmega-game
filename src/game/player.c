@@ -8,16 +8,16 @@
 
 #include <Arduino.h>
 #include <stdint.h>
+#include "ram.h"
 #include "player.h"
 #include "delay.h"
-#include "../lib/PCF8574/PCF8574.h"
-#include "../system.h"
 #include "../lib/nunchuk/nunchuk.h"
 #include "gfx/gfx.h"
 #include "resources.h"
 #include "../../lib/display7seg/display7seg.h"
 #include "world_generation/world.h"
 #include "net/proto.h"
+#include "sound/sound.h"
 
 #define TIME_BETWEEN_HOPS_MS 100
 #define FULL_PLAYTIME (7 * 1000)  // The player starts with 7 seconds of playtime
@@ -30,7 +30,6 @@ uint16_t score;
 uint16_t current_y = 0;
 
 gfx_vec2_t playerPosition;
-
 
 // GFX //
 gfx_bitmap_t player_BL;
@@ -123,6 +122,7 @@ void add_score() {
 
 void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 {
+    print_ram();
     int x = (int)x_stick_val - 128;
     int y = (int)y_stick_val - 128;
 
@@ -180,8 +180,9 @@ void move_player(uint8_t x_stick_val, uint8_t y_stick_val)
 
     uint8_t data[4] = { dir, (uint8_t)(playerPosition.x), (uint8_t)(playerPosition.y), 0 };
     proto_emit(CMD_MOVE, data);
-}
 
+    play_sound(HOP, 0);
+}
 
 void update_game_state() {
     // Death can't die
@@ -209,7 +210,6 @@ void unmark_deadly_tile(gfx_vec2_t world_pos) {
 }
 
 void update_player() {
-
     if (scheduler_millis() - last_hop_time > TIME_BETWEEN_HOPS_MS) {
         playtime_left_ms -= (int16_t)(scheduler_millis() - last_hop_time); // mikaib: Is the intent here to exponentially decrease the time left?
         update_7_display(playtime_left_ms / 1000); // mikaib: there is no bounds checking so we can pass negative values which will display the contents of memory ahead of where the mapping for the 7-segment display is located.
@@ -222,7 +222,6 @@ void update_player() {
             move_player(joyX, joyY);
         }
     }
-
 
     update_game_state();
 }

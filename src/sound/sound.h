@@ -31,7 +31,7 @@
 */
 
 // How many notes to read per chunk (reduce to save RAM)
-#define NOTE_CHUNK_SIZE 5
+#define NOTE_CHUNK_SIZE 3
 #define SFD_MAGIC "sfdV1"
 #define SFD_MAGIC_LEN 5
 
@@ -50,23 +50,21 @@ typedef struct {
     s_Note note_buffer[NOTE_CHUNK_SIZE];
     uint8_t buffer_count;
     uint8_t buffer_index;
+
+    bool needs_loading;
 } s_SoundReader;
 
 typedef struct {
     uint16_t frequency_offset;
     bool looping;
-    uint16_t playing_index;
-    uint32_t playing_start_time;
 
     s_SoundReader reader;
 } s_Sound;
 
-SOUND_EXTERN_C s_Sound register_sound(const char *filename);
+SOUND_EXTERN_C void play_sound(const char *filename, uint16_t frequncy_offset);
 
-SOUND_EXTERN_C void reset_sound(s_Sound *sound_ref);
+SOUND_EXTERN_C void stop_sound_playback(void);
 
-SOUND_EXTERN_C void play_sound(s_Sound *sound_ref);
-
-SOUND_EXTERN_C void set_frequency_offset(s_Sound *sound_ref);
+SOUND_EXTERN_C void update_sound_chunks();
 
 #endif //ATMEGA_GAME_SOUND_H
