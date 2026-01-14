@@ -81,8 +81,11 @@ void start(void)
     gfx_init();
     world_init();
 
+    show_boot_screen();
+
     game_scene.tilemap = world_get_tilemap();
     game_scene.sprite_count = 0;
+
     gfx_set_scene(&game_scene);
 
     init_player();
